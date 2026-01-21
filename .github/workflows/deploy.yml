@@ -1,0 +1,75 @@
+name: Deploy
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  deploy-api:
+    name: Deploy API to Sevalla
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build packages
+        run: |
+          npm run build --workspace=@milanos/shared
+          npm run db:generate --workspace=@milanos/api
+          npm run build --workspace=@milanos/api
+
+      - name: Deploy to Sevalla
+        run: |
+          echo "Deploy API to Sevalla"
+          # Add Sevalla deployment commands here
+        env:
+          SEVALLA_API_KEY: ${{ secrets.SEVALLA_API_KEY }}
+
+  deploy-web:
+    name: Deploy Web to AWS Amplify
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build packages
+        run: |
+          npm run build --workspace=@milanos/shared
+          npm run build --workspace=@milanos/web
+        env:
+          NEXT_PUBLIC_API_URL: ${{ secrets.PRODUCTION_API_URL }}
+          NEXT_PUBLIC_SHIFT4_I4GO_URL: ${{ secrets.SHIFT4_I4GO_URL }}
+
+      - name: Deploy to AWS Amplify
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
+
+      - name: Trigger Amplify deployment
+        run: |
+          echo "Trigger AWS Amplify deployment"
+          # Add Amplify deployment commands here
+        env:
+          AMPLIFY_APP_ID: ${{ secrets.AMPLIFY_APP_ID }}

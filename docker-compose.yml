@@ -1,0 +1,95 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:16-alpine
+    container_name: milanos-postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: milanos_pizza
+    ports:
+      - '5432:5432'
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U postgres']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Redis
+  redis:
+    image: redis:7-alpine
+    container_name: milanos-redis
+    ports:
+      - '6379:6379'
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 10s
+      timeout: 3s
+      retries: 5
+
+  # API (Fastify)
+  api:
+    build:
+      context: .
+      dockerfile: ./apps/api/Dockerfile
+    container_name: milanos-api
+    environment:
+      NODE_ENV: development
+      PORT: 3001
+      DATABASE_URL: postgresql://postgres:postgres@postgres:5432/milanos_pizza
+      REDIS_URL: redis://redis:6379
+      FRONTEND_URL: http://localhost:3000
+      SESSION_SECRET: dev-secret-change-in-production
+      SHIFT4_API_KEY: ${SHIFT4_API_KEY}
+      SHIFT4_API_SECRET: ${SHIFT4_API_SECRET}
+      SHIFT4_ENVIRONMENT: sandbox
+      AWS_REGION: ${AWS_REGION}
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
+      SES_FROM_EMAIL: ${SES_FROM_EMAIL}
+      SES_FROM_NAME: Milano's Pizza
+      TAX_RATE: 0.0825
+    ports:
+      - '3001:3001'
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - ./apps/api:/app
+      - /app/node_modules
+      - /app/dist
+    command: npm run dev
+
+  # Web (Next.js)
+  web:
+    build:
+      context: .
+      dockerfile: ./apps/web/Dockerfile
+    container_name: milanos-web
+    environment:
+      NODE_ENV: development
+      NEXT_PUBLIC_API_URL: http://localhost:3001
+      NEXT_PUBLIC_SHIFT4_I4GO_URL: https://i4go-sandbox.shift4.com/checkout
+      NEXT_PUBLIC_SITE_NAME: Milano's Pizza
+      NEXT_PUBLIC_SITE_URL: http://localhost:3000
+    ports:
+      - '3000:3000'
+    depends_on:
+      - api
+    volumes:
+      - ./apps/web:/app
+      - /app/node_modules
+      - /app/.next
+    command: npm run dev
+
+volumes:
+  postgres_data:
+  redis_data:

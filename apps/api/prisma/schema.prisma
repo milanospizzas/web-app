@@ -1,0 +1,790 @@
+// Milano's Pizza Database Schema
+// Complete schema for restaurant ordering platform
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ==================== LOCATIONS & BUSINESS INFO ====================
+
+model Location {
+  id                String   @id @default(cuid())
+  name              String
+  slug              String   @unique
+  address1          String
+  address2          String?
+  city              String
+  state             String
+  zipCode           String
+  phone             String
+  email             String
+  timezone          String   @default("America/New_York")
+  latitude          Decimal? @db.Decimal(10, 8)
+  longitude         Decimal? @db.Decimal(11, 8)
+  isActive          Boolean  @default(true)
+  acceptsOrders     Boolean  @default(true)
+  acceptsDelivery   Boolean  @default(true)
+  acceptsPickup     Boolean  @default(true)
+  acceptsDineIn     Boolean  @default(false)
+  posLocationId     String?
+  posSystemType     String?  @default("mock")
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  menus             Menu[]
+  orders            Order[]
+  deliveryZones     DeliveryZone[]
+  operatingHours    OperatingHours[]
+  capacitySlots     DeliveryCapacitySlot[]
+
+  @@index([slug])
+  @@index([isActive])
+  @@map("locations")
+}
+
+model OperatingHours {
+  id            String   @id @default(cuid())
+  locationId    String
+  dayOfWeek     Int      // 0 = Sunday, 6 = Saturday
+  openTime      String   // HH:MM format
+  closeTime     String   // HH:MM format
+  isClosed      Boolean  @default(false)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  location      Location @relation(fields: [locationId], references: [id], onDelete: Cascade)
+
+  @@unique([locationId, dayOfWeek])
+  @@map("operating_hours")
+}
+
+// ==================== MENU MANAGEMENT ====================
+
+model Menu {
+  id              String   @id @default(cuid())
+  locationId      String
+  name            String
+  description     String?
+  isActive        Boolean  @default(true)
+  availableFrom   DateTime?
+  availableUntil  DateTime?
+  displayOrder    Int      @default(0)
+  posMenuId       String?
+  lastSyncAt      DateTime?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  location        Location       @relation(fields: [locationId], references: [id], onDelete: Cascade)
+  categories      MenuCategory[]
+
+  @@index([locationId, isActive])
+  @@map("menus")
+}
+
+model MenuCategory {
+  id            String   @id @default(cuid())
+  menuId        String
+  name          String
+  description   String?
+  isActive      Boolean  @default(true)
+  displayOrder  Int      @default(0)
+  imageUrl      String?
+  posCategoryId String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  menu          Menu       @relation(fields: [menuId], references: [id], onDelete: Cascade)
+  items         MenuItem[]
+
+  @@index([menuId, isActive])
+  @@map("menu_categories")
+}
+
+model MenuItem {
+  id              String   @id @default(cuid())
+  categoryId      String
+  name            String
+  description     String?
+  price           Decimal  @db.Decimal(10, 2)
+  calories        Int?
+  imageUrl        String?
+  isActive        Boolean  @default(true)
+  isAvailable     Boolean  @default(true)
+  is86ed          Boolean  @default(false)
+  displayOrder    Int      @default(0)
+  tags            String[] // e.g., ["vegetarian", "gluten-free", "spicy"]
+  allergens       String[] // e.g., ["dairy", "nuts", "wheat"]
+  posItemId       String?
+  sku             String?
+  prepTime        Int?     // minutes
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  category        MenuCategory           @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  modifierGroups  MenuItemModifierGroup[]
+  orderItems      OrderItem[]
+  cartItems       CartItem[]
+
+  @@index([categoryId, isActive])
+  @@index([posItemId])
+  @@map("menu_items")
+}
+
+model ModifierGroup {
+  id              String   @id @default(cuid())
+  name            String
+  description     String?
+  minSelection    Int      @default(0)
+  maxSelection    Int?
+  isRequired      Boolean  @default(false)
+  displayOrder    Int      @default(0)
+  posGroupId      String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  modifiers       Modifier[]
+  menuItems       MenuItemModifierGroup[]
+
+  @@index([posGroupId])
+  @@map("modifier_groups")
+}
+
+model Modifier {
+  id              String   @id @default(cuid())
+  groupId         String
+  name            String
+  price           Decimal  @db.Decimal(10, 2)
+  calories        Int?
+  isAvailable     Boolean  @default(true)
+  displayOrder    Int      @default(0)
+  posModifierId   String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  group           ModifierGroup       @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  orderItemMods   OrderItemModifier[]
+  cartItemMods    CartItemModifier[]
+
+  @@index([groupId])
+  @@index([posModifierId])
+  @@map("modifiers")
+}
+
+model MenuItemModifierGroup {
+  menuItemId      String
+  modifierGroupId String
+  displayOrder    Int      @default(0)
+  createdAt       DateTime @default(now())
+
+  menuItem        MenuItem      @relation(fields: [menuItemId], references: [id], onDelete: Cascade)
+  modifierGroup   ModifierGroup @relation(fields: [modifierGroupId], references: [id], onDelete: Cascade)
+
+  @@id([menuItemId, modifierGroupId])
+  @@map("menu_item_modifier_groups")
+}
+
+// ==================== USERS & AUTHENTICATION ====================
+
+model User {
+  id                String    @id @default(cuid())
+  email             String    @unique
+  phone             String?
+  firstName         String?
+  lastName          String?
+  dateOfBirth       DateTime? @db.Date
+  emailVerified     Boolean   @default(false)
+  phoneVerified     Boolean   @default(false)
+  isActive          Boolean   @default(true)
+  isAdmin           Boolean   @default(false)
+  lastLoginAt       DateTime?
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  addresses         Address[]
+  magicLinks        AuthMagicLink[]
+  sessions          Session[]
+  orders            Order[]
+  loyaltyAccount    LoyaltyAccount?
+  carts             Cart[]
+  referralsSent     ReferralInvite[] @relation("ReferrerUser")
+  referralsReceived ReferralInvite[] @relation("ReferredUser")
+
+  @@index([email])
+  @@map("users")
+}
+
+model AuthMagicLink {
+  id          String   @id @default(cuid())
+  userId      String
+  token       String   @unique
+  email       String
+  expiresAt   DateTime
+  usedAt      DateTime?
+  ipAddress   String?
+  userAgent   String?
+  createdAt   DateTime @default(now())
+
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([token])
+  @@index([userId])
+  @@index([expiresAt])
+  @@map("auth_magic_links")
+}
+
+model Session {
+  id          String   @id @default(cuid())
+  userId      String
+  token       String   @unique
+  expiresAt   DateTime
+  ipAddress   String?
+  userAgent   String?
+  createdAt   DateTime @default(now())
+  lastActiveAt DateTime @default(now())
+
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([token])
+  @@index([userId])
+  @@index([expiresAt])
+  @@map("sessions")
+}
+
+model Address {
+  id            String   @id @default(cuid())
+  userId        String
+  label         String?  // e.g., "Home", "Work"
+  address1      String
+  address2      String?
+  city          String
+  state         String
+  zipCode       String
+  deliveryNotes String?
+  isDefault     Boolean  @default(false)
+  latitude      Decimal? @db.Decimal(10, 8)
+  longitude     Decimal? @db.Decimal(11, 8)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  orders        Order[]
+
+  @@index([userId])
+  @@map("addresses")
+}
+
+// ==================== CART ====================
+
+model Cart {
+  id            String   @id @default(cuid())
+  userId        String?
+  sessionId     String?
+  locationId    String?
+  status        String   @default("active") // active, converted, abandoned
+  expiresAt     DateTime
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  user          User?      @relation(fields: [userId], references: [id], onDelete: SetNull)
+  items         CartItem[]
+
+  @@index([userId])
+  @@index([sessionId])
+  @@index([status])
+  @@map("carts")
+}
+
+model CartItem {
+  id            String   @id @default(cuid())
+  cartId        String
+  menuItemId    String
+  quantity      Int
+  priceAtAdd    Decimal  @db.Decimal(10, 2)
+  specialInstructions String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  cart          Cart               @relation(fields: [cartId], references: [id], onDelete: Cascade)
+  menuItem      MenuItem           @relation(fields: [menuItemId], references: [id])
+  modifiers     CartItemModifier[]
+
+  @@index([cartId])
+  @@map("cart_items")
+}
+
+model CartItemModifier {
+  id            String   @id @default(cuid())
+  cartItemId    String
+  modifierId    String
+  quantity      Int      @default(1)
+  priceAtAdd    Decimal  @db.Decimal(10, 2)
+  createdAt     DateTime @default(now())
+
+  cartItem      CartItem @relation(fields: [cartItemId], references: [id], onDelete: Cascade)
+  modifier      Modifier @relation(fields: [modifierId], references: [id])
+
+  @@index([cartItemId])
+  @@map("cart_item_modifiers")
+}
+
+// ==================== ORDERS ====================
+
+model Order {
+  id                  String   @id @default(cuid())
+  orderNumber         String   @unique // Human-friendly order number
+  userId              String?
+  locationId          String
+  addressId           String?
+  orderType           String   // delivery, pickup, dine-in
+  status              String   @default("pending") // pending, confirmed, preparing, ready, out-for-delivery, completed, cancelled
+
+  // Pricing
+  subtotal            Decimal  @db.Decimal(10, 2)
+  tax                 Decimal  @db.Decimal(10, 2)
+  deliveryFee         Decimal  @db.Decimal(10, 2) @default(0)
+  tip                 Decimal  @db.Decimal(10, 2) @default(0)
+  discount            Decimal  @db.Decimal(10, 2) @default(0)
+  loyaltyDiscount     Decimal  @db.Decimal(10, 2) @default(0)
+  total               Decimal  @db.Decimal(10, 2)
+
+  // Customer info
+  customerName        String
+  customerEmail       String
+  customerPhone       String
+
+  // Delivery details
+  deliveryAddress1    String?
+  deliveryAddress2    String?
+  deliveryCity        String?
+  deliveryState       String?
+  deliveryZipCode     String?
+  deliveryNotes       String?
+
+  // Timing
+  scheduledFor        DateTime?
+  estimatedReadyAt    DateTime?
+  estimatedDeliveryAt DateTime?
+  preparedAt          DateTime?
+  completedAt         DateTime?
+  cancelledAt         DateTime?
+
+  // POS integration
+  posOrderId          String?
+  posSyncStatus       String?  @default("pending") // pending, synced, failed
+  posSyncedAt         DateTime?
+  posErrorMessage     String?
+
+  // Special instructions
+  specialInstructions String?
+
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  user                User?               @relation(fields: [userId], references: [id], onDelete: SetNull)
+  location            Location            @relation(fields: [locationId], references: [id])
+  address             Address?            @relation(fields: [addressId], references: [id], onDelete: SetNull)
+  items               OrderItem[]
+  payments            PaymentTransaction[]
+  statusHistory       OrderStatusHistory[]
+  loyaltyEvents       LoyaltyEvent[]
+
+  @@index([orderNumber])
+  @@index([userId])
+  @@index([locationId])
+  @@index([status])
+  @@index([orderType])
+  @@index([createdAt])
+  @@map("orders")
+}
+
+model OrderItem {
+  id                  String   @id @default(cuid())
+  orderId             String
+  menuItemId          String
+  quantity            Int
+  unitPrice           Decimal  @db.Decimal(10, 2)
+  totalPrice          Decimal  @db.Decimal(10, 2)
+  specialInstructions String?
+  posItemId           String?
+  createdAt           DateTime @default(now())
+
+  order               Order                @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  menuItem            MenuItem             @relation(fields: [menuItemId], references: [id])
+  modifiers           OrderItemModifier[]
+
+  @@index([orderId])
+  @@map("order_items")
+}
+
+model OrderItemModifier {
+  id          String   @id @default(cuid())
+  orderItemId String
+  modifierId  String
+  quantity    Int      @default(1)
+  unitPrice   Decimal  @db.Decimal(10, 2)
+  totalPrice  Decimal  @db.Decimal(10, 2)
+  createdAt   DateTime @default(now())
+
+  orderItem   OrderItem @relation(fields: [orderItemId], references: [id], onDelete: Cascade)
+  modifier    Modifier  @relation(fields: [modifierId], references: [id])
+
+  @@index([orderItemId])
+  @@map("order_item_modifiers")
+}
+
+model OrderStatusHistory {
+  id          String   @id @default(cuid())
+  orderId     String
+  status      String
+  note        String?
+  changedBy   String?  // userId or "system"
+  createdAt   DateTime @default(now())
+
+  order       Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  @@index([orderId])
+  @@map("order_status_history")
+}
+
+// ==================== PAYMENTS ====================
+
+model PaymentTransaction {
+  id                    String   @id @default(cuid())
+  orderId               String
+  transactionType       String   // sale, refund, void
+  status                String   // pending, authorized, completed, failed, voided, refunded
+
+  // Amount details
+  amount                Decimal  @db.Decimal(10, 2)
+  currency              String   @default("USD")
+
+  // Shift4 details
+  shift4TransactionId   String?  @unique
+  shift4InvoiceNumber   String?  @unique
+  shift4Token           String?
+  shift4AuthCode        String?
+  shift4ResponseCode    String?
+  shift4ResponseMessage String?
+  shift4AvsResult       String?
+  shift4CvvResult       String?
+
+  // Card details (last 4 only, PCI compliant)
+  cardLast4             String?
+  cardBrand             String?
+  cardExpMonth          Int?
+  cardExpYear           Int?
+
+  // Metadata
+  ipAddress             String?
+  userAgent             String?
+  errorMessage          String?
+  rawResponse           Json?    // Store full response for debugging
+
+  // References
+  parentTransactionId   String?  // For refunds/voids
+
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+
+  order                 Order                 @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  parentTransaction     PaymentTransaction?   @relation("TransactionRefunds", fields: [parentTransactionId], references: [id])
+  refunds               PaymentTransaction[]  @relation("TransactionRefunds")
+  transactionLogs       TransactionLog[]
+
+  @@index([orderId])
+  @@index([shift4TransactionId])
+  @@index([shift4InvoiceNumber])
+  @@index([status])
+  @@map("payment_transactions")
+}
+
+model TransactionLog {
+  id                  String   @id @default(cuid())
+  transactionId       String
+  event               String   // request_sent, response_received, error, status_check
+  requestPayload      Json?    // Redacted
+  responsePayload     Json?    // Redacted
+  httpStatusCode      Int?
+  errorMessage        String?
+  createdAt           DateTime @default(now())
+
+  transaction         PaymentTransaction @relation(fields: [transactionId], references: [id], onDelete: Cascade)
+
+  @@index([transactionId])
+  @@index([createdAt])
+  @@map("transaction_logs")
+}
+
+// ==================== LOYALTY SYSTEM ====================
+
+model LoyaltyAccount {
+  id                String   @id @default(cuid())
+  userId            String   @unique
+  pointsBalance     Int      @default(0)
+  lifetimePoints    Int      @default(0)
+  currentTier       String   @default("bronze") // bronze, silver, gold, platinum
+  tierStartDate     DateTime @default(now())
+  referralCode      String   @unique
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  user              User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  events            LoyaltyEvent[]
+  stampCards        StampCard[]
+  rewards           LoyaltyReward[]
+
+  @@index([userId])
+  @@index([referralCode])
+  @@map("loyalty_accounts")
+}
+
+model LoyaltyEvent {
+  id              String   @id @default(cuid())
+  accountId       String
+  orderId         String?
+  eventType       String   // earn, redeem, expire, bonus, referral, birthday
+  points          Int
+  description     String
+  expiresAt       DateTime?
+  metadata        Json?
+  createdAt       DateTime @default(now())
+
+  account         LoyaltyAccount @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  order           Order?         @relation(fields: [orderId], references: [id], onDelete: SetNull)
+
+  @@index([accountId])
+  @@index([orderId])
+  @@index([createdAt])
+  @@map("loyalty_events")
+}
+
+model StampCard {
+  id              String   @id @default(cuid())
+  accountId       String
+  cardType        String   // e.g., "pizza_lover"
+  stampsRequired  Int      @default(10)
+  stampsEarned    Int      @default(0)
+  status          String   @default("active") // active, completed, redeemed
+  completedAt     DateTime?
+  redeemedAt      DateTime?
+  expiresAt       DateTime?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  account         LoyaltyAccount @relation(fields: [accountId], references: [id], onDelete: Cascade)
+
+  @@index([accountId])
+  @@index([status])
+  @@map("stamp_cards")
+}
+
+model LoyaltyReward {
+  id              String   @id @default(cuid())
+  accountId       String
+  rewardType      String   // discount, free_item, birthday
+  name            String
+  description     String?
+  pointsCost      Int?
+  discountAmount  Decimal? @db.Decimal(10, 2)
+  discountPercent Int?
+  status          String   @default("available") // available, redeemed, expired
+  redeemedAt      DateTime?
+  expiresAt       DateTime?
+  createdAt       DateTime @default(now())
+
+  account         LoyaltyAccount @relation(fields: [accountId], references: [id], onDelete: Cascade)
+
+  @@index([accountId])
+  @@index([status])
+  @@map("loyalty_rewards")
+}
+
+model ReferralInvite {
+  id              String   @id @default(cuid())
+  referrerUserId  String
+  referredUserId  String?
+  referredEmail   String
+  code            String   @unique
+  status          String   @default("pending") // pending, completed, expired
+  referrerReward  Int      @default(0) // Points awarded to referrer
+  referredReward  Int      @default(0) // Points awarded to referred
+  completedAt     DateTime?
+  expiresAt       DateTime
+  createdAt       DateTime @default(now())
+
+  referrerUser    User     @relation("ReferrerUser", fields: [referrerUserId], references: [id], onDelete: Cascade)
+  referredUser    User?    @relation("ReferredUser", fields: [referredUserId], references: [id], onDelete: SetNull)
+
+  @@index([referrerUserId])
+  @@index([code])
+  @@index([status])
+  @@map("referral_invites")
+}
+
+// ==================== DELIVERY MANAGEMENT ====================
+
+model DeliveryZone {
+  id              String   @id @default(cuid())
+  locationId      String
+  name            String
+  zipCodes        String[] // Array of zip codes
+  polygon         Json?    // GeoJSON polygon for precise boundaries
+  deliveryFee     Decimal  @db.Decimal(10, 2)
+  minimumOrder    Decimal  @db.Decimal(10, 2) @default(0)
+  estimatedTime   Int      // minutes
+  isActive        Boolean  @default(true)
+  displayOrder    Int      @default(0)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  location        Location @relation(fields: [locationId], references: [id], onDelete: Cascade)
+
+  @@index([locationId])
+  @@map("delivery_zones")
+}
+
+model DeliveryCapacitySlot {
+  id              String   @id @default(cuid())
+  locationId      String
+  date            DateTime @db.Date
+  startTime       String   // HH:MM format
+  endTime         String   // HH:MM format
+  maxOrders       Int
+  currentOrders   Int      @default(0)
+  isActive        Boolean  @default(true)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  location        Location @relation(fields: [locationId], references: [id], onDelete: Cascade)
+
+  @@unique([locationId, date, startTime])
+  @@index([locationId, date])
+  @@map("delivery_capacity_slots")
+}
+
+// ==================== CONTENT MANAGEMENT ====================
+
+model ContentPage {
+  id              String   @id @default(cuid())
+  slug            String   @unique
+  title           String
+  metaDescription String?
+  content         Json     // Rich text content as JSON
+  isPublished     Boolean  @default(false)
+  publishedAt     DateTime?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([slug])
+  @@map("content_pages")
+}
+
+model BlogPost {
+  id              String   @id @default(cuid())
+  slug            String   @unique
+  title           String
+  excerpt         String?
+  content         Json     // Rich text content as JSON
+  featuredImage   String?
+  authorName      String
+  tags            String[]
+  isPublished     Boolean  @default(false)
+  publishedAt     DateTime?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([slug])
+  @@index([isPublished])
+  @@map("blog_posts")
+}
+
+model FAQ {
+  id              String   @id @default(cuid())
+  category        String
+  question        String
+  answer          String
+  displayOrder    Int      @default(0)
+  isPublished     Boolean  @default(true)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([category])
+  @@map("faqs")
+}
+
+// ==================== CATERING ====================
+
+model CateringRequest {
+  id              String   @id @default(cuid())
+  name            String
+  email           String
+  phone           String
+  companyName     String?
+  eventDate       DateTime
+  eventTime       String
+  guestCount      Int
+  eventType       String   // corporate, wedding, party, etc.
+  message         String?
+  status          String   @default("pending") // pending, contacted, quoted, confirmed, completed, cancelled
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([status])
+  @@index([eventDate])
+  @@map("catering_requests")
+}
+
+// ==================== SYSTEM & AUDIT ====================
+
+model AuditLog {
+  id              String   @id @default(cuid())
+  userId          String?
+  action          String
+  entityType      String
+  entityId        String?
+  changes         Json?
+  ipAddress       String?
+  userAgent       String?
+  createdAt       DateTime @default(now())
+
+  @@index([userId])
+  @@index([entityType, entityId])
+  @@index([createdAt])
+  @@map("audit_logs")
+}
+
+model SystemConfig {
+  id              String   @id @default(cuid())
+  key             String   @unique
+  value           Json
+  description     String?
+  isEncrypted     Boolean  @default(false)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@map("system_config")
+}
+
+model EmailLog {
+  id              String   @id @default(cuid())
+  to              String
+  from            String
+  subject         String
+  templateName    String?
+  status          String   // pending, sent, failed, bounced
+  provider        String   @default("ses")
+  providerId      String?  // SES Message ID
+  errorMessage    String?
+  sentAt          DateTime?
+  createdAt       DateTime @default(now())
+
+  @@index([to])
+  @@index([status])
+  @@index([createdAt])
+  @@map("email_logs")
+}

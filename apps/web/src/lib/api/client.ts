@@ -23,7 +23,7 @@ export interface ApiResponse<T = unknown> {
 }
 
 async function handleResponse<T>(response: Response): Promise<T> {
-  const data: ApiResponse<T> = await response.json();
+    const data = await response.json() as ApiResponse<T>;
 
   if (!response.ok || !data.success) {
     throw new APIError(

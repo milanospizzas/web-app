@@ -1,5 +1,10 @@
+[providers]
+node = "20"
+
 [phases.setup]
 aptPkgs = []
+nixPkgs = ["pnpm"]
+
 
 [phases.install]
 cmds = ["pnpm install --frozen-lockfile"]

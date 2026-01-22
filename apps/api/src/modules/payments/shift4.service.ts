@@ -1,3 +1,4 @@
+import { Prisma } from '@prisma/client';
 import { config } from '../../config';
 import { prisma } from '../../shared/database/prisma';
 import { logger } from '../../shared/utils/logger';
@@ -9,6 +10,29 @@ import type {
   Shift4AccessTokenResponse,
   Shift4InvoiceInformationResponse,
 } from '@milanos/shared';
+
+/**
+ * Converts unknown data into Prisma-safe JSON input.
+ * - Strips undefined + non-JSON values by round-tripping through JSON.
+ * - Preserves null (as JSON null) inside objects/arrays.
+ */
+function toPrismaJson(value: unknown): Prisma.InputJsonValue {
+  return JSON.parse(JSON.stringify(value)) as Prisma.InputJsonValue;
+}
+
+/**
+ * For nullable Json columns:
+ * - undefined => do not set/update the field
+ * - null => store SQL NULL (DbNull)
+ * - object/array/value => JSON-safe InputJsonValue
+ */
+function toNullablePrismaJson(
+  value: unknown
+): Prisma.InputJsonValue | Prisma.NullableJsonNullValueInput | undefined {
+  if (value === undefined) return undefined;
+  if (value === null) return Prisma.DbNull;
+  return toPrismaJson(value);
+}
 
 export class Shift4Service {
   private baseUrl: string;
@@ -48,12 +72,12 @@ export class Shift4Service {
         throw new Error(`Failed to get access token: ${response.statusText}`);
       }
 
-      const data: { result: Shift4AccessTokenResponse } = await response.json();
+      const data = (await response.json()) as { result: Shift4AccessTokenResponse };
       this.accessToken = data.result.accessToken;
       this.tokenExpiry = new Date(Date.now() + data.result.expiresIn * 1000);
 
       logger.info('Shift4 access token obtained');
-      return this.accessToken;
+      return this.accessToken!;
     } catch (error) {
       logger.error({ error }, 'Failed to get Shift4 access token');
       throw error;
@@ -114,7 +138,7 @@ export class Shift4Service {
         body: JSON.stringify(requestBody),
       });
 
-      const responseData: Shift4SaleResponse = await response.json();
+      const responseData = (await response.json()) as Shift4SaleResponse;
 
       // Log response
       await this.logTransaction(transaction.id, 'response_received', responseData, response.status);
@@ -138,7 +162,7 @@ export class Shift4Service {
           shift4ResponseMessage: txnData.responseText,
           shift4AvsResult: txnData.avsResult,
           shift4CvvResult: txnData.cvvResult,
-          rawResponse: responseData,
+          rawResponse: toNullablePrismaJson(responseData),
         },
       });
 
@@ -165,7 +189,7 @@ export class Shift4Service {
         transaction.id,
         'error',
         null,
-        null,
+        undefined,
         error instanceof Error ? error.message : 'Unknown error'
       );
 
@@ -176,7 +200,7 @@ export class Shift4Service {
   async processRefund(
     transactionId: string,
     amount?: number,
-    reason?: string
+    _reason?: string
   ): Promise<{ refundTransactionId: string }> {
     const originalTransaction = await prisma.paymentTransaction.findUnique({
       where: { id: transactionId },
@@ -233,7 +257,7 @@ export class Shift4Service {
         body: JSON.stringify(requestBody),
       });
 
-      const responseData = await response.json();
+      const responseData = (await response.json()) as { message?: string };
 
       // Log response
       await this.logTransaction(
@@ -252,7 +276,7 @@ export class Shift4Service {
         where: { id: refundTransaction.id },
         data: {
           status: 'completed',
-          rawResponse: responseData,
+          rawResponse: toNullablePrismaJson(responseData),
         },
       });
 
@@ -364,14 +388,14 @@ export class Shift4Service {
     httpStatusCode?: number,
     errorMessage?: string
   ) {
-    const redactedPayload = payload ? redactSensitiveData(payload) : null;
+    const redactedPayload = payload ? redactSensitiveData(payload) : undefined;
 
     await prisma.transactionLog.create({
       data: {
         transactionId,
         event,
-        requestPayload: event === 'request_sent' ? (redactedPayload ?? undefined) : undefined,
-        responsePayload: event === 'response_received' ? (redactedPayload ?? undefined) : undefined,
+        requestPayload: toNullablePrismaJson(event === 'request_sent' ? redactedPayload : undefined),
+        responsePayload: toNullablePrismaJson(event === 'response_received' ? redactedPayload : undefined),
         httpStatusCode: httpStatusCode || undefined,
         errorMessage,
       },

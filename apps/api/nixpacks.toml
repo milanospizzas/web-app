@@ -1,6 +1,5 @@
 [phases.setup]
-aptPkgs = []
-cmds = ["corepack enable", "corepack prepare pnpm@latest --activate"]
+nixPkgs = ["nodejs", "pnpm"]
 
 [phases.install]
 cmds = ["pnpm install --frozen-lockfile"]

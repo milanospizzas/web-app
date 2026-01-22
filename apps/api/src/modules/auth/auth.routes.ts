@@ -80,7 +80,11 @@ export async function authRoutes(fastify: FastifyInstance) {
   fastify.patch('/profile', { preHandler: authMiddleware }, async (request, reply) => {
     try {
       const body = updateProfileSchema.parse(request.body);
-      const user = await authService.updateProfile(request.user!.id, body);
+      const profileData = {
+        ...body,
+        dateOfBirth: body.dateOfBirth ? new Date(body.dateOfBirth) : undefined,
+      };
+      const user = await authService.updateProfile(request.user!.id, profileData);
       return successResponse(reply, user);
     } catch (error) {
       request.log.error(error);

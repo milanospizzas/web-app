@@ -77,7 +77,7 @@ export class Shift4Service {
       this.tokenExpiry = new Date(Date.now() + data.result.expiresIn * 1000);
 
       logger.info('Shift4 access token obtained');
-      return this.accessToken;
+      return this.accessToken!;
     } catch (error) {
       logger.error({ error }, 'Failed to get Shift4 access token');
       throw error;

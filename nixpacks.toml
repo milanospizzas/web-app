@@ -5,6 +5,7 @@ nixPkgs = ["nodejs", "pnpm"]
 cmds = ["pnpm install"]
 
 [phases.build]
-cmds = ["pnpm --filter @milanos/api build"]
+cmds = ["cd packages/shared && pnpm run build", "cd apps/api && pnpm run build"ld"]
+
 [start]
 cmd = "cd apps/api && pnpm run start"

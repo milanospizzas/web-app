@@ -8,5 +8,8 @@
       "@milanos/shared": ["../../packages/shared/src"]
     }
   },
+    "references": [
+    { "path": "../../packages/shared" }
+  ],
   "include": ["src/**/*"],
   "exclude": ["node_modules", "dist"]

@@ -7,13 +7,15 @@ frontend:
         - pnpm install
     build:
       commands:
+        - cd apps/web
         - pnpm run build
   artifacts:
-    baseDirectory: apps/web/dist
+    baseDirectory: apps/web/.next
     files:
       - '**/*'
   cache:
     paths:
       - node_modules/**/*
       - apps/web/node_modules/**/*
+      - apps/web/.next/cache/**/*
       - packages/shared/node_modules/**/*

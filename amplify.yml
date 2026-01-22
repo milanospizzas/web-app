@@ -10,7 +10,7 @@ frontend:
         - cd apps/web
         - pnpm run build
   artifacts:
-        baseDirectory: apps/web
+    baseDirectory: apps/web/.next
     files:
       - '**/*'
   cache:

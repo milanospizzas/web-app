@@ -2,7 +2,7 @@ packages:
   - "apps/*"
   - "packages/*"
 
-  onlyBuiltDependencies:
+onlyBuiltDependencies:
   - "@prisma/client"
   - "@prisma/engines"
   - "bcrypt"

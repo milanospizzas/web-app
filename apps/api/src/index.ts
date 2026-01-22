@@ -14,7 +14,20 @@ import { menuRoutes } from './modules/menu/menu.routes';
 import { ordersRoutes } from './modules/orders/orders.routes';
 
 const fastify = Fastify({
-  logger: logger,
+  logger: {
+    level: config.LOG_LEVEL,
+    transport:
+      config.NODE_ENV === 'development'
+        ? {
+            target: 'pino-pretty',
+            options: {
+              colorize: true,
+              translateTime: 'HH:MM:ss Z',
+              ignore: 'pid,hostname',
+            },
+          }
+        : undefined,
+  },
   requestIdLogLabel: 'reqId',
   disableRequestLogging: false,
   trustProxy: true,

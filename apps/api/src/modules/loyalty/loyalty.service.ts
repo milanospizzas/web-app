@@ -1,12 +1,11 @@
 import { prisma } from '../../shared/database/prisma';
-import { config } from '../../config';
 import {
   calculateLoyaltyPoints,
   getLoyaltyTier,
   LOYALTY_CONFIG,
   generateReferralCode,
+  type LoyaltyTier,
 } from '@milanos/shared';
-import type { LoyaltyTier } from '@milanos/shared';
 
 export class LoyaltyService {
   async getLoyaltyAccount(userId: string) {
@@ -49,7 +48,7 @@ export class LoyaltyService {
 
   async awardPointsForOrder(userId: string, orderId: string, orderTotal: number) {
     const account = await this.getLoyaltyAccount(userId);
-    const points = calculateLoyaltyPoints(orderTotal, account.currentTier);
+    const points = calculateLoyaltyPoints(orderTotal, account.currentTier as LoyaltyTier);
 
     // Check if order already awarded points
     const existingEvent = await prisma.loyaltyEvent.findFirst({

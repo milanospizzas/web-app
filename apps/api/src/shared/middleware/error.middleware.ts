@@ -2,7 +2,7 @@ import { FastifyError, FastifyRequest, FastifyReply } from 'fastify';
 import { ZodError } from 'zod';
 import { Prisma } from '@prisma/client';
 
-export async function errorHandler(
+export function errorHandler(
   error: FastifyError,
   request: FastifyRequest,
   reply: FastifyReply

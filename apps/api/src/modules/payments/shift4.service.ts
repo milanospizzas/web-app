@@ -1,3 +1,4 @@
+import { Prisma } from '@prisma/client';
 import { config } from '../../config';
 import { prisma } from '../../shared/database/prisma';
 import { logger } from '../../shared/utils/logger';
@@ -9,6 +10,29 @@ import type {
   Shift4AccessTokenResponse,
   Shift4InvoiceInformationResponse,
 } from '@milanos/shared';
+
+/**
+ * Converts unknown data into Prisma-safe JSON input.
+ * - Strips undefined + non-JSON values by round-tripping through JSON.
+ * - Preserves null (as JSON null) inside objects/arrays.
+ */
+function toPrismaJson(value: unknown): Prisma.InputJsonValue {
+  return JSON.parse(JSON.stringify(value)) as Prisma.InputJsonValue;
+}
+
+/**
+ * For nullable Json columns:
+ * - undefined => do not set/update the field
+ * - null => store SQL NULL (DbNull)
+ * - object/array/value => JSON-safe InputJsonValue
+ */
+function toNullablePrismaJson(
+  value: unknown
+): Prisma.InputJsonValue | Prisma.NullableJsonNullValueInput | undefined {
+  if (value === undefined) return undefined;
+  if (value === null) return Prisma.DbNull;
+  return toPrismaJson(value);
+}
 
 export class Shift4Service {
   private baseUrl: string;
@@ -138,7 +162,7 @@ export class Shift4Service {
           shift4ResponseMessage: txnData.responseText,
           shift4AvsResult: txnData.avsResult,
           shift4CvvResult: txnData.cvvResult,
-          rawResponse: responseData,
+          rawResponse: toNullablePrismaJson(responseData),
         },
       });
 
@@ -252,7 +276,7 @@ export class Shift4Service {
         where: { id: refundTransaction.id },
         data: {
           status: 'completed',
-          rawResponse: responseData,
+          rawResponse: toNullablePrismaJson(responseData),
         },
       });
 
@@ -370,8 +394,8 @@ export class Shift4Service {
       data: {
         transactionId,
         event,
-        requestPayload: event === 'request_sent' ? (redactedPayload ?? undefined) : undefined,
-        responsePayload: event === 'response_received' ? (redactedPayload ?? undefined) : undefined,
+        requestPayload: toNullablePrismaJson(event === 'request_sent' ? redactedPayload : undefined),
+        responsePayload: toNullablePrismaJson(event === 'response_received' ? redactedPayload : undefined),
         httpStatusCode: httpStatusCode || undefined,
         errorMessage,
       },

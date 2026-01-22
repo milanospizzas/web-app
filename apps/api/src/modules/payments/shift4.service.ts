@@ -277,7 +277,7 @@ export class Shift4Service {
     }
   }
 
-  async voidTransaction(transactionId: string, reason?: string) {
+  async voidTransaction(transactionId: string, _reason?: string) {
     const transaction = await prisma.paymentTransaction.findUnique({
       where: { id: transactionId },
     });
@@ -311,7 +311,7 @@ export class Shift4Service {
         }),
       });
 
-      const responseData = await response.json();
+      const responseData = (await response.json()) as { message?: string };
 
       if (!response.ok) {
         throw new Error(responseData.message || 'Void processing failed');
@@ -354,7 +354,7 @@ export class Shift4Service {
       throw new Error('Failed to get invoice information');
     }
 
-    return response.json();
+    return (await response.json()) as Shift4InvoiceInformationResponse;
   }
 
   private async logTransaction(
@@ -370,8 +370,8 @@ export class Shift4Service {
       data: {
         transactionId,
         event,
-        requestPayload: event === 'request_sent' ? redactedPayload : undefined,
-        responsePayload: event === 'response_received' ? redactedPayload : undefined,
+        requestPayload: event === 'request_sent' ? (redactedPayload ?? undefined) : undefined,
+        responsePayload: event === 'response_received' ? (redactedPayload ?? undefined) : undefined,
         httpStatusCode: httpStatusCode || undefined,
         errorMessage,
       },

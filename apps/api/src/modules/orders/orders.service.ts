@@ -3,7 +3,6 @@ import { prisma } from '../../shared/database/prisma';
 import { config } from '../../config';
 import { emailService } from '../email/email.service';
 import { loyaltyService } from '../loyalty/loyalty.service';
-import { shift4Service } from '../payments/shift4.service';
 import { calculateTax, calculateOrderTotal } from '@milanos/shared';
 import type { CreateOrderInput, OrderStatus } from '@milanos/shared';
 

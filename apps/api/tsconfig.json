@@ -2,15 +2,16 @@
   "extends": "../../tsconfig.json",
   "compilerOptions": {
     "outDir": "./dist",
+    "rootDir": "./src",
     "moduleResolution": "node",
     "esModuleInterop": true,
     "paths": {
       "@milanos/shared": ["../../packages/shared/src"]
     }
   },
-    "references": [
+  "references": [
     { "path": "../../packages/shared" }
   ],
   "include": ["src/**/*"],
-  "exclude": ["node_modules", "dist"]
-  }
+  "exclude": ["node_modules", "dist", "prisma"]
+}

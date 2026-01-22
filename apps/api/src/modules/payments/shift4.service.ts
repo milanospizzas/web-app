@@ -72,7 +72,7 @@ export class Shift4Service {
         throw new Error(`Failed to get access token: ${response.statusText}`);
       }
 
-      const data: { result: Shift4AccessTokenResponse } = await response.json();
+      const data = (await response.json()) as { result: Shift4AccessTokenResponse };
       this.accessToken = data.result.accessToken;
       this.tokenExpiry = new Date(Date.now() + data.result.expiresIn * 1000);
 
@@ -138,7 +138,7 @@ export class Shift4Service {
         body: JSON.stringify(requestBody),
       });
 
-      const responseData: Shift4SaleResponse = await response.json();
+      const responseData = (await response.json()) as Shift4SaleResponse;
 
       // Log response
       await this.logTransaction(transaction.id, 'response_received', responseData, response.status);
@@ -189,7 +189,7 @@ export class Shift4Service {
         transaction.id,
         'error',
         null,
-        null,
+        undefined,
         error instanceof Error ? error.message : 'Unknown error'
       );
 
@@ -200,7 +200,7 @@ export class Shift4Service {
   async processRefund(
     transactionId: string,
     amount?: number,
-    reason?: string
+    _reason?: string
   ): Promise<{ refundTransactionId: string }> {
     const originalTransaction = await prisma.paymentTransaction.findUnique({
       where: { id: transactionId },
@@ -257,7 +257,7 @@ export class Shift4Service {
         body: JSON.stringify(requestBody),
       });
 
-      const responseData = await response.json();
+      const responseData = (await response.json()) as { message?: string };
 
       // Log response
       await this.logTransaction(
@@ -388,7 +388,7 @@ export class Shift4Service {
     httpStatusCode?: number,
     errorMessage?: string
   ) {
-    const redactedPayload = payload ? redactSensitiveData(payload) : null;
+    const redactedPayload = payload ? redactSensitiveData(payload) : undefined;
 
     await prisma.transactionLog.create({
       data: {

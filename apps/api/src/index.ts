@@ -12,6 +12,7 @@ import { errorHandler } from './shared/middleware/error.middleware';
 import { authRoutes } from './modules/auth/auth.routes';
 import { menuRoutes } from './modules/menu/menu.routes';
 import { ordersRoutes } from './modules/orders/orders.routes';
+import { posRoutes } from './modules/pos/pos.routes';
 
 const fastify = Fastify({
   logger: {
@@ -77,6 +78,7 @@ async function start() {
     await fastify.register(authRoutes, { prefix: '/api/auth' });
     await fastify.register(menuRoutes, { prefix: '/api/menu' });
     await fastify.register(ordersRoutes, { prefix: '/api/orders' });
+    await fastify.register(posRoutes, { prefix: '/api/pos' });
 
     // Start server
     await fastify.listen({

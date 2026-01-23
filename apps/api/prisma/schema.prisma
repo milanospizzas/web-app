@@ -41,9 +41,11 @@ model Location {
   deliveryZones     DeliveryZone[]
   operatingHours    OperatingHours[]
   capacitySlots     DeliveryCapacitySlot[]
+  posSyncLogs       POSSyncLog[]
 
   @@index([slug])
   @@index([isActive])
+  @@index([posLocationId])
   @@map("locations")
 }
 
@@ -737,6 +739,71 @@ model CateringRequest {
   @@index([status])
   @@index([eventDate])
   @@map("catering_requests")
+}
+
+// ==================== POS INTEGRATION ====================
+
+model POSSyncLog {
+  id              String   @id @default(cuid())
+  locationId      String
+  syncType        String   // full, incremental, stock, webhook
+  status          String   @default("pending") // pending, in_progress, completed, failed
+  startedAt       DateTime @default(now())
+  completedAt     DateTime?
+  itemsSynced     Int      @default(0)
+  modifiersSynced Int      @default(0)
+  errorMessage    String?
+  errorDetails    Json?
+  metadata        Json?
+  createdAt       DateTime @default(now())
+
+  location        Location @relation(fields: [locationId], references: [id], onDelete: Cascade)
+
+  @@index([locationId])
+  @@index([status])
+  @@index([createdAt])
+  @@map("pos_sync_logs")
+}
+
+model POSWebhookEvent {
+  id              String   @id @default(cuid())
+  eventId         String   @unique // External event ID for deduplication
+  eventType       String
+  locationGuid    String
+  payload         Json
+  status          String   @default("pending") // pending, processed, failed
+  processedAt     DateTime?
+  errorMessage    String?
+  retryCount      Int      @default(0)
+  createdAt       DateTime @default(now())
+
+  @@index([eventId])
+  @@index([locationGuid])
+  @@index([status])
+  @@index([createdAt])
+  @@map("pos_webhook_events")
+}
+
+model POSFailedRequest {
+  id              String   @id @default(cuid())
+  locationId      String?
+  requestType     String   // order_submit, menu_sync, stock_update, etc.
+  requestPayload  Json
+  errorMessage    String
+  errorCode       String?
+  retryCount      Int      @default(0)
+  maxRetries      Int      @default(3)
+  nextRetryAt     DateTime?
+  status          String   @default("pending") // pending, retrying, completed, abandoned
+  completedAt     DateTime?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([locationId])
+  @@index([status])
+  @@index([nextRetryAt])
+  @@index([requestType])
+  @@map("pos_failed_requests")
 }
 
 // ==================== SYSTEM & AUDIT ====================

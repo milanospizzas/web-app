@@ -23,11 +23,18 @@ const configSchema = z.object({
   // Frontend
   FRONTEND_URL: z.string().default('http://localhost:3000'),
 
-  // Shift4
+  // Shift4 Payments
   SHIFT4_API_KEY: z.string(),
   SHIFT4_API_SECRET: z.string(),
   SHIFT4_ENVIRONMENT: z.enum(['sandbox', 'production']).default('sandbox'),
   SHIFT4_CLERK_ID: z.string().default('1'),
+
+  // SkyTab POS (Shift4 Conecto API)
+  SKYTAB_API_KEY: z.string().optional(),
+  SKYTAB_API_SECRET: z.string().optional(),
+  SKYTAB_LOCATION_ID: z.string().optional(),
+  SKYTAB_WEBHOOK_SECRET: z.string().optional(),
+  SKYTAB_SYNC_INTERVAL_MINUTES: z.string().transform(Number).default('5'),
 
   // AWS SES
   AWS_REGION: z.string().default('us-east-1'),

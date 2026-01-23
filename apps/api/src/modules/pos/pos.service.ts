@@ -2,6 +2,7 @@ import { prisma } from '../../shared/database/prisma';
 import { logger } from '../../shared/utils/logger';
 import type { POSProvider, POSOrder } from './pos.interface';
 import { mockPOSProvider } from './providers/mock-pos.provider';
+import { skyTabProvider } from './providers/skytab';
 
 export class POSService {
   private providers: Map<string, POSProvider> = new Map();
@@ -9,6 +10,7 @@ export class POSService {
   constructor() {
     // Register providers
     this.providers.set('mock', mockPOSProvider);
+    this.providers.set('skytab', skyTabProvider);
     // Add other providers here (Toast, Square, etc.)
   }
 

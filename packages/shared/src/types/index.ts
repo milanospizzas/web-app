@@ -5,6 +5,7 @@ export * from './order';
 export * from './payment';
 export * from './loyalty';
 export * from './user';
+export * from './skytab';
 
 // Common types
 export interface PaginationParams {

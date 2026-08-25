@@ -1,10 +1,10 @@
-import { FastifyInstance } from 'fastify';
+import type { FastifyPluginCallback } from 'fastify';
 import { menuService } from './menu.service';
 import { adminMiddleware, authMiddleware } from '../../shared/middleware/auth.middleware';
 import { successResponse, errorResponse } from '../../shared/utils/response';
 import { createMenuItemSchema, updateMenuItemSchema } from '@milanos/shared';
 
-export async function menuRoutes(fastify: FastifyInstance) {
+export const menuRoutes: FastifyPluginCallback = (fastify, _options, done) => {
   // Get menus for a location
   fastify.get('/locations/:locationId/menus', async (request, reply) => {
     try {
@@ -101,4 +101,6 @@ export async function menuRoutes(fastify: FastifyInstance) {
       }
     }
   );
-}
+
+  done();
+};

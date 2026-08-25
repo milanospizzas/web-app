@@ -1,4 +1,5 @@
 import { SESClient, SendEmailCommand } from '@aws-sdk/client-ses';
+import { Order } from '@prisma/client';
 import { config } from '../../config';
 import { prisma } from '../../shared/database/prisma';
 import { logger } from '../../shared/utils/logger';
@@ -18,6 +19,11 @@ interface SendEmailParams {
   textBody?: string;
   templateName?: string;
 }
+
+type EmailOrder = Pick<
+  Order,
+  'id' | 'orderNumber' | 'orderType' | 'total' | 'customerEmail'
+>;
 
 export class EmailService {
   async sendEmail({ to, subject, htmlBody, textBody, templateName }: SendEmailParams) {
@@ -144,7 +150,7 @@ export class EmailService {
     });
   }
 
-  async sendOrderConfirmation(order: any) {
+  async sendOrderConfirmation(order: EmailOrder) {
     const htmlBody = `
       <!DOCTYPE html>
       <html>
@@ -185,7 +191,7 @@ export class EmailService {
     });
   }
 
-  async sendOrderStatusUpdate(order: any, newStatus: string) {
+  async sendOrderStatusUpdate(order: EmailOrder, newStatus: string) {
     const statusMessages: Record<string, string> = {
       confirmed: 'Your order has been confirmed!',
       preparing: 'Your order is being prepared.',

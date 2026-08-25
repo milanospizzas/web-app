@@ -5,6 +5,7 @@ process.env.NODE_ENV = 'test';
 process.env.DATABASE_URL = 'postgresql://test:test@localhost:5432/test';
 process.env.REDIS_URL = 'redis://localhost:6379';
 process.env.SESSION_SECRET = 'test-session-secret';
+process.env.MAGIC_LINK_EXPIRY_MINUTES = '15';
 process.env.FRONTEND_URL = 'http://localhost:3000';
 process.env.SHIFT4_API_KEY = 'test-api-key';
 process.env.SHIFT4_API_SECRET = 'test-api-secret';

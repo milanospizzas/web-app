@@ -19,6 +19,12 @@ const configSchema = z.object({
   // Session
   SESSION_SECRET: z.string(),
   SESSION_EXPIRY_HOURS: z.string().transform(Number).default('720'),
+  MAGIC_LINK_EXPIRY_MINUTES: z
+    .string()
+    .regex(/^[1-9]\d*$/)
+    .transform(Number)
+    .pipe(z.number().int().positive().finite())
+    .default('15'),
 
   // Frontend
   FRONTEND_URL: z.string().default('http://localhost:3000'),

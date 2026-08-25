@@ -65,11 +65,11 @@ describe('SkyTabClient', () => {
         expect.stringContaining('/api/rest/v1/credentials/accesstoken'),
         expect.objectContaining({
           method: 'POST',
-          headers: expect.objectContaining({
+          headers: {
             'Content-Type': 'application/json',
             InterfaceVersion: '4.0',
             InterfaceName: 'MilanosPizza',
-          }),
+          },
         })
       );
     });
@@ -135,9 +135,12 @@ describe('SkyTabClient', () => {
         expect.stringContaining('/api/test'),
         expect.objectContaining({
           method: 'GET',
-          headers: expect.objectContaining({
+          headers: {
+            'Content-Type': 'application/json',
+            InterfaceVersion: '4.0',
+            InterfaceName: 'MilanosPizza',
             AccessToken: 'test-token-123',
-          }),
+          },
         })
       );
     });

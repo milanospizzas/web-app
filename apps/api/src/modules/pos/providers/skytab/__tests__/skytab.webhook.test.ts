@@ -1,7 +1,14 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import crypto from 'crypto';
 import { SkyTabWebhookHandler } from '../skytab.webhook';
-import type { SkyTabWebhookPayload, SkyTabTicketWebhookData } from '@milanos/shared';
+import type {
+  SkyTabWebhookPayload,
+  SkyTabWebhookEventType,
+  SkyTabTicketWebhookData,
+  SkyTabMenuWebhookData,
+  SkyTabStockWebhookData,
+  SkyTabLocationWebhookData,
+} from '@milanos/shared';
 
 // Mock config
 vi.mock('../../../../../config', () => ({
@@ -21,30 +28,30 @@ vi.mock('../../../../../shared/utils/logger', () => ({
 }));
 
 // Mock prisma
-const mockPrisma = {
+const mockPrisma = vi.hoisted(() => ({
   order: {
-    findFirst: vi.fn(),
-    update: vi.fn(),
+    findFirst: vi.fn<[], Promise<unknown>>(),
+    update: vi.fn<[args: unknown], Promise<unknown>>(),
   },
   orderStatusHistory: {
-    create: vi.fn(),
+    create: vi.fn<[], Promise<unknown>>(),
   },
   location: {
-    findFirst: vi.fn(),
+    findFirst: vi.fn<[], Promise<unknown>>(),
   },
   menu: {
-    updateMany: vi.fn(),
+    updateMany: vi.fn<[], Promise<unknown>>(),
   },
   menuItem: {
-    findFirst: vi.fn(),
-    update: vi.fn(),
-    updateMany: vi.fn(),
+    findFirst: vi.fn<[], Promise<unknown>>(),
+    update: vi.fn<[], Promise<unknown>>(),
+    updateMany: vi.fn<[], Promise<unknown>>(),
   },
   auditLog: {
-    findFirst: vi.fn(),
-    create: vi.fn(),
+    findFirst: vi.fn<[], Promise<unknown>>(),
+    create: vi.fn<[], Promise<unknown>>(),
   },
-};
+}));
 
 vi.mock('../../../../../shared/database/prisma', () => ({
   prisma: mockPrisma,
@@ -95,17 +102,17 @@ describe('SkyTabWebhookHandler', () => {
   describe('processWebhook', () => {
     describe('ticket events', () => {
       const createTicketPayload = (
-        eventType: string,
+        eventType: SkyTabWebhookEventType,
         data: Partial<SkyTabTicketWebhookData>
       ): SkyTabWebhookPayload => ({
-        eventType: eventType as any,
+        eventType,
         eventId: 'event-123',
         timestamp: '2024-01-15T17:00:00Z',
         locationGuid: 'location-123',
         data: {
           ticketGuid: 'ticket-123',
           externalReference: 'order-123',
-          status: 'CONFIRMED' as any,
+          status: 'CONFIRMED',
           ...data,
         } as SkyTabTicketWebhookData,
         signature: '',
@@ -127,16 +134,13 @@ describe('SkyTabWebhookHandler', () => {
         });
 
         const result = await handler.processWebhook(payload);
+        const update: unknown = mockPrisma.order.update.mock.calls[0]?.[0];
 
         expect(result.success).toBe(true);
-        expect(mockPrisma.order.update).toHaveBeenCalledWith(
-          expect.objectContaining({
-            where: { id: 'order-123' },
-            data: expect.objectContaining({
-              status: 'preparing',
-            }),
-          })
-        );
+        expect(update).toMatchObject({
+          where: { id: 'order-123' },
+          data: { status: 'preparing' },
+        });
       });
 
       it('should process ticket.cancelled event', async () => {
@@ -155,15 +159,12 @@ describe('SkyTabWebhookHandler', () => {
         });
 
         const result = await handler.processWebhook(payload);
+        const update: unknown = mockPrisma.order.update.mock.calls[0]?.[0];
 
         expect(result.success).toBe(true);
-        expect(mockPrisma.order.update).toHaveBeenCalledWith(
-          expect.objectContaining({
-            data: expect.objectContaining({
-              status: 'cancelled',
-            }),
-          })
-        );
+        expect(update).toMatchObject({
+          data: { status: 'cancelled' },
+        });
       });
 
       it('should skip duplicate events', async () => {
@@ -209,7 +210,7 @@ describe('SkyTabWebhookHandler', () => {
           data: {
             menuGuid: 'menu-123',
             changedItems: ['item-1', 'item-2'],
-          } as any,
+          } satisfies SkyTabMenuWebhookData,
           signature: '',
         };
 
@@ -243,7 +244,7 @@ describe('SkyTabWebhookHandler', () => {
               { itemGuid: 'item-1', isAvailable: false },
               { itemGuid: 'item-2', isAvailable: true },
             ],
-          } as any,
+          } satisfies SkyTabStockWebhookData,
           signature: '',
         };
 
@@ -265,7 +266,7 @@ describe('SkyTabWebhookHandler', () => {
           locationGuid: 'location-123',
           data: {
             items: [{ itemGuid: 'unknown-item', isAvailable: false }],
-          } as any,
+          } satisfies SkyTabStockWebhookData,
           signature: '',
         };
 
@@ -292,7 +293,7 @@ describe('SkyTabWebhookHandler', () => {
           data: {
             locationGuid: 'location-123',
             isOpen: true,
-          } as any,
+          } satisfies SkyTabLocationWebhookData,
           signature: '',
         };
 

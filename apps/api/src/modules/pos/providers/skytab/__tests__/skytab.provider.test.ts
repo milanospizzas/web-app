@@ -9,13 +9,20 @@ import type {
   SkyTabStockStatusResponse,
 } from '@milanos/shared';
 
+const { mockGet, mockPost, mockPut, mockTestConnection } = vi.hoisted(() => ({
+  mockGet: vi.fn<[endpoint: string], Promise<unknown>>(),
+  mockPost: vi.fn<[endpoint: string, body?: unknown], Promise<unknown>>(),
+  mockPut: vi.fn<[endpoint: string, body?: unknown], Promise<unknown>>(),
+  mockTestConnection: vi.fn<[], Promise<boolean>>(),
+}));
+
 // Mock the client
 vi.mock('../skytab.client', () => ({
   skyTabClient: {
-    get: vi.fn(),
-    post: vi.fn(),
-    put: vi.fn(),
-    testConnection: vi.fn(),
+    get: mockGet,
+    post: mockPost,
+    put: mockPut,
+    testConnection: mockTestConnection,
   },
   SkyTabApiError: class extends Error {
     code: string;
@@ -47,9 +54,6 @@ vi.mock('../../../../../shared/utils/logger', () => ({
   },
 }));
 
-// Import mocked client
-import { skyTabClient } from '../skytab.client';
-
 describe('SkyTabProvider', () => {
   let provider: SkyTabProvider;
   const mockLocationGuid = 'test-location-123';
@@ -66,16 +70,16 @@ describe('SkyTabProvider', () => {
 
   describe('authenticate', () => {
     it('should return true when connection is successful', async () => {
-      vi.mocked(skyTabClient.testConnection).mockResolvedValue(true);
+      mockTestConnection.mockResolvedValue(true);
 
       const result = await provider.authenticate();
 
       expect(result).toBe(true);
-      expect(skyTabClient.testConnection).toHaveBeenCalled();
+      expect(mockTestConnection).toHaveBeenCalled();
     });
 
     it('should return false when connection fails', async () => {
-      vi.mocked(skyTabClient.testConnection).mockResolvedValue(false);
+      mockTestConnection.mockResolvedValue(false);
 
       const result = await provider.authenticate();
 
@@ -83,7 +87,7 @@ describe('SkyTabProvider', () => {
     });
 
     it('should return false and log error when exception occurs', async () => {
-      vi.mocked(skyTabClient.testConnection).mockRejectedValue(new Error('Network error'));
+      mockTestConnection.mockRejectedValue(new Error('Network error'));
 
       const result = await provider.authenticate();
 
@@ -154,7 +158,7 @@ describe('SkyTabProvider', () => {
     };
 
     it('should sync full menu successfully', async () => {
-      vi.mocked(skyTabClient.get).mockResolvedValue(mockMenuResponse);
+      mockGet.mockResolvedValue(mockMenuResponse);
 
       const result = await provider.syncFullMenu(mockLocationGuid);
 
@@ -179,7 +183,7 @@ describe('SkyTabProvider', () => {
     });
 
     it('should throw error when menu sync fails', async () => {
-      vi.mocked(skyTabClient.get).mockRejectedValue(
+      mockGet.mockRejectedValue(
         new SkyTabApiError('Menu sync failed', 'MENU_SYNC_FAILED', 500)
       );
 
@@ -226,42 +230,41 @@ describe('SkyTabProvider', () => {
     };
 
     it('should send order successfully', async () => {
-      vi.mocked(skyTabClient.post).mockResolvedValue(mockTicketResponse);
+      mockPost.mockResolvedValue(mockTicketResponse);
 
       const result = await provider.sendOrder(mockOrder);
+      const request: unknown = mockPost.mock.calls[0]?.[1];
 
       expect(result.success).toBe(true);
       expect(result.posOrderId).toBe('ticket-123');
-      expect(skyTabClient.post).toHaveBeenCalledWith(
-        '/api/rest/v1/pos/tickets',
-        expect.objectContaining({
-          ticket: expect.objectContaining({
-            externalReference: 'order-123',
-            orderType: 'DELIVERY',
-          }),
-        })
-      );
+      expect(mockPost.mock.calls[0]?.[0]).toBe('/api/rest/v1/pos/tickets');
+      expect(request).toMatchObject({
+        ticket: {
+          externalReference: 'order-123',
+          orderType: 'DELIVERY',
+        },
+      });
     });
 
     it('should map order type correctly', async () => {
-      vi.mocked(skyTabClient.post).mockResolvedValue(mockTicketResponse);
+      mockPost.mockResolvedValue(mockTicketResponse);
 
       // Test pickup
       await provider.sendOrder({ ...mockOrder, orderType: 'pickup' });
-      expect(vi.mocked(skyTabClient.post).mock.calls[0][1]).toMatchObject({
+      expect(mockPost.mock.calls[0]?.[1]).toMatchObject({
         ticket: { orderType: 'PICKUP' },
       });
 
       // Test dine-in
       vi.clearAllMocks();
       await provider.sendOrder({ ...mockOrder, orderType: 'dine-in' });
-      expect(vi.mocked(skyTabClient.post).mock.calls[0][1]).toMatchObject({
+      expect(mockPost.mock.calls[0]?.[1]).toMatchObject({
         ticket: { orderType: 'DINE_IN' },
       });
     });
 
     it('should throw error when order submission fails', async () => {
-      vi.mocked(skyTabClient.post).mockRejectedValue(
+      mockPost.mockRejectedValue(
         new SkyTabApiError('Order failed', 'ORDER_SUBMIT_FAILED', 500)
       );
 
@@ -283,7 +286,7 @@ describe('SkyTabProvider', () => {
     };
 
     it('should get order status successfully', async () => {
-      vi.mocked(skyTabClient.get).mockResolvedValue(mockStatusResponse);
+      mockGet.mockResolvedValue(mockStatusResponse);
 
       const result = await provider.getOrderStatus('ticket-123');
 
@@ -304,7 +307,7 @@ describe('SkyTabProvider', () => {
       ];
 
       for (const [skyTabStatus, expectedStatus] of statusMap) {
-        vi.mocked(skyTabClient.get).mockResolvedValue({
+        mockGet.mockResolvedValue({
           result: {
             ticket: {
               guid: 'ticket-123',
@@ -333,7 +336,7 @@ describe('SkyTabProvider', () => {
     };
 
     it('should cancel order successfully', async () => {
-      vi.mocked(skyTabClient.post).mockResolvedValue(mockCancelResponse);
+      mockPost.mockResolvedValue(mockCancelResponse);
 
       const result = await provider.cancelOrder('ticket-123');
 
@@ -341,7 +344,7 @@ describe('SkyTabProvider', () => {
     });
 
     it('should return true for already cancelled orders', async () => {
-      vi.mocked(skyTabClient.post).mockRejectedValue(
+      mockPost.mockRejectedValue(
         new SkyTabApiError('Invalid status', 'INVALID_TICKET_STATUS', 400)
       );
 
@@ -351,7 +354,7 @@ describe('SkyTabProvider', () => {
     });
 
     it('should return true for not found orders', async () => {
-      vi.mocked(skyTabClient.post).mockRejectedValue(
+      mockPost.mockRejectedValue(
         new SkyTabApiError('Not found', 'TICKET_NOT_FOUND', 404)
       );
 
@@ -363,7 +366,7 @@ describe('SkyTabProvider', () => {
 
   describe('updateItemAvailability', () => {
     it('should update item availability successfully', async () => {
-      vi.mocked(skyTabClient.put).mockResolvedValue({
+      mockPut.mockResolvedValue({
         result: {
           success: true,
           item: {
@@ -377,7 +380,7 @@ describe('SkyTabProvider', () => {
       const result = await provider.updateItemAvailability('item-1', false);
 
       expect(result).toBe(true);
-      expect(skyTabClient.put).toHaveBeenCalledWith(
+      expect(mockPut).toHaveBeenCalledWith(
         `/api/rest/v1/pos/locations/${mockLocationGuid}/stock`,
         {
           itemGuid: 'item-1',
@@ -400,7 +403,7 @@ describe('SkyTabProvider', () => {
     };
 
     it('should get unavailable items successfully', async () => {
-      vi.mocked(skyTabClient.get).mockResolvedValue(mockStockResponse);
+      mockGet.mockResolvedValue(mockStockResponse);
 
       const result = await provider.getUnavailableItems(mockLocationGuid);
 

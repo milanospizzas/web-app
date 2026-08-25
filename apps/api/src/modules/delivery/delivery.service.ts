@@ -1,3 +1,4 @@
+import { Prisma } from '@prisma/client';
 import { prisma } from '../../shared/database/prisma';
 
 export class DeliveryService {
@@ -27,7 +28,7 @@ export class DeliveryService {
     return zones;
   }
 
-  async createDeliveryZone(data: any) {
+  async createDeliveryZone(data: Prisma.DeliveryZoneUncheckedCreateInput) {
     const zone = await prisma.deliveryZone.create({
       data,
     });
@@ -35,7 +36,7 @@ export class DeliveryService {
     return zone;
   }
 
-  async updateDeliveryZone(zoneId: string, data: any) {
+  async updateDeliveryZone(zoneId: string, data: Prisma.DeliveryZoneUncheckedUpdateInput) {
     const zone = await prisma.deliveryZone.update({
       where: { id: zoneId },
       data,

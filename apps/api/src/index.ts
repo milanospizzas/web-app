@@ -62,7 +62,7 @@ async function start() {
     fastify.setErrorHandler(errorHandler);
 
     // Health check
-    fastify.get('/health', async () => {
+    fastify.get('/health', () => {
       return {
         status: 'ok',
         timestamp: new Date().toISOString(),
@@ -102,7 +102,14 @@ async function shutdown() {
   process.exit(0);
 }
 
-process.on('SIGINT', shutdown);
-process.on('SIGTERM', shutdown);
+function handleShutdown() {
+  void shutdown().catch((error: unknown) => {
+    logger.error(error);
+    process.exit(1);
+  });
+}
 
-start();
+process.on('SIGINT', handleShutdown);
+process.on('SIGTERM', handleShutdown);
+
+void start();

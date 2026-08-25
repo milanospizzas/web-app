@@ -1,3 +1,4 @@
+import { Prisma } from '@prisma/client';
 import { prisma } from '../../shared/database/prisma';
 
 export class MenuService {
@@ -120,7 +121,7 @@ export class MenuService {
   }
 
   // Admin functions
-  async createMenuItem(data: any) {
+  async createMenuItem(data: Prisma.MenuItemUncheckedCreateInput) {
     const item = await prisma.menuItem.create({
       data: {
         ...data,
@@ -132,7 +133,7 @@ export class MenuService {
     return item;
   }
 
-  async updateMenuItem(itemId: string, data: any) {
+  async updateMenuItem(itemId: string, data: Prisma.MenuItemUncheckedUpdateInput) {
     const item = await prisma.menuItem.update({
       where: { id: itemId },
       data,
@@ -149,7 +150,7 @@ export class MenuService {
     return { success: true };
   }
 
-  async createModifier(data: any) {
+  async createModifier(data: Prisma.ModifierUncheckedCreateInput) {
     const modifier = await prisma.modifier.create({
       data,
     });
@@ -157,7 +158,7 @@ export class MenuService {
     return modifier;
   }
 
-  async updateModifier(modifierId: string, data: any) {
+  async updateModifier(modifierId: string, data: Prisma.ModifierUncheckedUpdateInput) {
     const modifier = await prisma.modifier.update({
       where: { id: modifierId },
       data,

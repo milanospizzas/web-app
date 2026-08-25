@@ -1,5 +1,6 @@
 import cookie from '@fastify/cookie';
 import Fastify from 'fastify';
+import type { FastifyReply, FastifyRequest } from 'fastify';
 import { describe, expect, it, vi } from 'vitest';
 
 const mocks = vi.hoisted(() => ({
@@ -8,12 +9,13 @@ const mocks = vi.hoisted(() => ({
   logout: vi.fn(),
   getCurrentUser: vi.fn(),
   updateProfile: vi.fn(),
+  authMiddleware: vi.fn<[FastifyRequest, FastifyReply], Promise<void>>(),
 }));
 
 vi.mock('../auth.service', () => ({ authService: mocks }));
 
 vi.mock('../../../shared/middleware/auth.middleware', () => ({
-  authMiddleware: vi.fn(),
+  authMiddleware: mocks.authMiddleware,
 }));
 
 import { authRoutes } from '../auth.routes';
@@ -76,6 +78,71 @@ describe('authRoutes', () => {
       expect(Object.keys((body as { data: { session: object } }).data.session)).not.toContain(
         'token'
       );
+    } finally {
+      await app.close();
+    }
+  });
+
+  it('short-circuits a protected route after an unauthorized response', async () => {
+    const app = Fastify({ pluginTimeout: 1000 });
+    mocks.authMiddleware.mockImplementation((_request: FastifyRequest, reply: FastifyReply) => {
+      void reply.status(401).send({
+        success: false,
+        error: {
+          code: 'AUTH_UNAUTHORIZED',
+          message: 'Authentication required',
+        },
+      });
+      return Promise.resolve();
+    });
+
+    try {
+      await app.register(cookie);
+      await app.register(authRoutes, { prefix: '/api/auth' });
+      await app.ready();
+
+      const response = await app.inject({ method: 'GET', url: '/api/auth/me' });
+
+      expect(response.statusCode).toBe(401);
+      expect(response.json()).toEqual({
+        success: false,
+        error: {
+          code: 'AUTH_UNAUTHORIZED',
+          message: 'Authentication required',
+        },
+      });
+      expect(mocks.authMiddleware).toHaveBeenCalledOnce();
+      expect(mocks.getCurrentUser).not.toHaveBeenCalled();
+    } finally {
+      await app.close();
+    }
+  });
+
+  it('continues a protected route after authentication populates request.user', async () => {
+    const app = Fastify({ pluginTimeout: 1000 });
+    const authenticatedUser = {
+      id: 'synthetic-authenticated-user-id',
+      email: 'authenticated@example.test',
+      isAdmin: false,
+    };
+    const currentUser = { ...authenticatedUser, firstName: 'Synthetic' };
+    mocks.authMiddleware.mockImplementation((request: FastifyRequest) => {
+      request.user = authenticatedUser;
+      return Promise.resolve();
+    });
+    mocks.getCurrentUser.mockResolvedValue(currentUser);
+
+    try {
+      await app.register(cookie);
+      await app.register(authRoutes, { prefix: '/api/auth' });
+      await app.ready();
+
+      const response = await app.inject({ method: 'GET', url: '/api/auth/me' });
+
+      expect(response.statusCode).toBe(200);
+      expect(mocks.getCurrentUser).toHaveBeenCalledOnce();
+      expect(mocks.getCurrentUser).toHaveBeenCalledWith(authenticatedUser.id);
+      expect(response.json()).toEqual({ success: true, data: currentUser });
     } finally {
       await app.close();
     }

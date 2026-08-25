@@ -1,5 +1,5 @@
 import type { User } from '@prisma/client';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 const mocks = vi.hoisted(() => ({
   findUser: vi.fn(),
@@ -53,6 +53,10 @@ describe('AuthService.sendMagicLink', () => {
     vi.useFakeTimers();
     vi.setSystemTime(fixedNow);
     mocks.nanoid.mockReturnValue(generatedToken);
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
   });
 
   it('expires an existing user magic link after 15 minutes independent of session lifetime', async () => {

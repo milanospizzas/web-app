@@ -2,7 +2,6 @@ import type {
   FastifyPluginCallback,
   FastifyReply,
   FastifyRequest,
-  HookHandlerDoneFunction,
 } from 'fastify';
 import { authService } from './auth.service';
 import { authMiddleware } from '../../shared/middleware/auth.middleware';
@@ -14,12 +13,11 @@ import {
 } from '@milanos/shared';
 
 export const authRoutes: FastifyPluginCallback = (fastify, _options, done) => {
-  const authenticate = (
+  const authenticate = async (
     request: FastifyRequest,
-    reply: FastifyReply,
-    hookDone: HookHandlerDoneFunction
-  ) => {
-    void authMiddleware(request, reply).then(() => hookDone(), hookDone);
+    reply: FastifyReply
+  ): Promise<void> => {
+    await authMiddleware(request, reply);
   };
 
   // Send magic link
@@ -65,7 +63,7 @@ export const authRoutes: FastifyPluginCallback = (fastify, _options, done) => {
   });
 
   // Logout
-  fastify.post('/logout', { preHandler: authenticate }, async (request, reply) => {
+  fastify.post('/logout', { preHandler: [authenticate] }, async (request, reply) => {
     try {
       const token = request.cookies.session_token;
       if (token) {
@@ -80,7 +78,7 @@ export const authRoutes: FastifyPluginCallback = (fastify, _options, done) => {
   });
 
   // Get current user
-  fastify.get('/me', { preHandler: authenticate }, async (request, reply) => {
+  fastify.get('/me', { preHandler: [authenticate] }, async (request, reply) => {
     try {
       const user = await authService.getCurrentUser(request.user!.id);
       return successResponse(reply, user);
@@ -91,7 +89,7 @@ export const authRoutes: FastifyPluginCallback = (fastify, _options, done) => {
   });
 
   // Update profile
-  fastify.patch('/profile', { preHandler: authenticate }, async (request, reply) => {
+  fastify.patch('/profile', { preHandler: [authenticate] }, async (request, reply) => {
     try {
       const body = updateProfileSchema.parse(request.body);
       const profileData = {

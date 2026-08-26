@@ -39,13 +39,16 @@ Verify magic link and create session.
 }
 ```
 
-**Response:** `200 OK` + Sets `session_token` cookie
+**Response:** `200 OK` + Sets the HttpOnly `session_token` cookie. The raw session token is never returned in the response body.
 ```json
 {
   "success": true,
   "data": {
     "user": { /* User object */ },
-    "session": { /* Session object */ }
+    "session": {
+      "id": "session-id",
+      "expiresAt": "2026-09-24T12:00:00.000Z"
+    }
   }
 }
 ```

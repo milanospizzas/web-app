@@ -33,7 +33,8 @@ export class AuthService {
 
     // Generate magic link token
     const token = nanoid(32);
-    const expiresAt = new Date(Date.now() + config.SESSION_EXPIRY_HOURS * 15 * 60 * 1000); // 15 minutes
+    // Magic-link lifetime is configured in minutes, independently of session lifetime.
+    const expiresAt = new Date(Date.now() + config.MAGIC_LINK_EXPIRY_MINUTES * 60 * 1000);
 
     await prisma.authMagicLink.create({
       data: {
@@ -105,7 +106,11 @@ export class AuthService {
 
     return {
       user: magicLink.user,
-      session,
+      sessionToken,
+      session: {
+        id: session.id,
+        expiresAt: session.expiresAt,
+      },
     };
   }
 

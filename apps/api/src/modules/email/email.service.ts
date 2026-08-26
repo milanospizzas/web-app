@@ -93,6 +93,8 @@ export class EmailService {
 
   async sendMagicLink(email: string, token: string, redirectUrl?: string) {
     const magicLink = `${config.FRONTEND_URL}/auth/verify?token=${token}${redirectUrl ? `&redirect=${encodeURIComponent(redirectUrl)}` : ''}`;
+    const expiryMinutes = config.MAGIC_LINK_EXPIRY_MINUTES;
+    const expiryLabel = `${expiryMinutes} ${expiryMinutes === 1 ? 'minute' : 'minutes'}`;
 
     const htmlBody = `
       <!DOCTYPE html>
@@ -116,7 +118,7 @@ export class EmailService {
               <a href="${magicLink}" style="color: #d32f2f;">${magicLink}</a>
             </p>
             <p style="color: #666; font-size: 14px;">
-              This link will expire in 15 minutes.
+              This link will expire in ${expiryLabel}.
             </p>
             <p style="color: #666; font-size: 14px;">
               If you didn't request this email, you can safely ignore it.
@@ -136,7 +138,7 @@ export class EmailService {
       Click this link to sign in to your account:
       ${magicLink}
 
-      This link will expire in 15 minutes.
+      This link will expire in ${expiryLabel}.
 
       If you didn't request this email, you can safely ignore it.
     `;

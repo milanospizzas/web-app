@@ -1,4 +1,8 @@
-import { FastifyInstance } from 'fastify';
+import type {
+  FastifyPluginCallback,
+  FastifyReply,
+  FastifyRequest,
+} from 'fastify';
 import { authService } from './auth.service';
 import { authMiddleware } from '../../shared/middleware/auth.middleware';
 import { successResponse, errorResponse } from '../../shared/utils/response';
@@ -8,7 +12,14 @@ import {
   updateProfileSchema,
 } from '@milanos/shared';
 
-export async function authRoutes(fastify: FastifyInstance) {
+export const authRoutes: FastifyPluginCallback = (fastify, _options, done) => {
+  const authenticate = async (
+    request: FastifyRequest,
+    reply: FastifyReply
+  ): Promise<void> => {
+    await authMiddleware(request, reply);
+  };
+
   // Send magic link
   fastify.post('/magic-link', async (request, reply) => {
     try {
@@ -32,7 +43,7 @@ export async function authRoutes(fastify: FastifyInstance) {
       );
 
       // Set session cookie
-      reply.setCookie('session_token', result.session.token, {
+      void reply.setCookie('session_token', result.sessionToken, {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
         sameSite: 'lax',
@@ -44,19 +55,20 @@ export async function authRoutes(fastify: FastifyInstance) {
         user: result.user,
         session: result.session,
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
       request.log.error(error);
-      return errorResponse(reply, 'AUTH_ERROR', error.message || 'Verification failed', 400);
+      const message = error instanceof Error ? error.message : 'Verification failed';
+      return errorResponse(reply, 'AUTH_ERROR', message, 400);
     }
   });
 
   // Logout
-  fastify.post('/logout', { preHandler: authMiddleware }, async (request, reply) => {
+  fastify.post('/logout', { preHandler: [authenticate] }, async (request, reply) => {
     try {
       const token = request.cookies.session_token;
       if (token) {
         await authService.logout(token);
-        reply.clearCookie('session_token');
+        void reply.clearCookie('session_token');
       }
       return successResponse(reply, { message: 'Logged out successfully' });
     } catch (error) {
@@ -66,7 +78,7 @@ export async function authRoutes(fastify: FastifyInstance) {
   });
 
   // Get current user
-  fastify.get('/me', { preHandler: authMiddleware }, async (request, reply) => {
+  fastify.get('/me', { preHandler: [authenticate] }, async (request, reply) => {
     try {
       const user = await authService.getCurrentUser(request.user!.id);
       return successResponse(reply, user);
@@ -77,7 +89,7 @@ export async function authRoutes(fastify: FastifyInstance) {
   });
 
   // Update profile
-  fastify.patch('/profile', { preHandler: authMiddleware }, async (request, reply) => {
+  fastify.patch('/profile', { preHandler: [authenticate] }, async (request, reply) => {
     try {
       const body = updateProfileSchema.parse(request.body);
       const profileData = {
@@ -91,4 +103,6 @@ export async function authRoutes(fastify: FastifyInstance) {
       return errorResponse(reply, 'AUTH_ERROR', 'Failed to update profile', 500);
     }
   });
-}
+
+  done();
+};

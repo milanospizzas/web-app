@@ -1,3 +1,4 @@
+import { Prisma } from '@prisma/client';
 import { Decimal } from '@prisma/client/runtime/library';
 import { prisma } from '../../shared/database/prisma';
 import { config } from '../../config';
@@ -6,8 +7,146 @@ import { loyaltyService } from '../loyalty/loyalty.service';
 import { calculateTax, calculateOrderTotal } from '@milanos/shared';
 import type { CreateOrderInput, OrderStatus } from '@milanos/shared';
 
+const customerMenuItemSelect = Prisma.validator<Prisma.MenuItemSelect>()({
+  id: true,
+  name: true,
+  description: true,
+  price: true,
+  calories: true,
+  imageUrl: true,
+  tags: true,
+  allergens: true,
+});
+
+const customerModifierSelect = Prisma.validator<Prisma.ModifierSelect>()({
+  id: true,
+  name: true,
+  price: true,
+  calories: true,
+});
+
+const customerOrderItemSelect = Prisma.validator<Prisma.OrderItemSelect>()({
+  id: true,
+  orderId: true,
+  menuItemId: true,
+  quantity: true,
+  unitPrice: true,
+  totalPrice: true,
+  specialInstructions: true,
+  createdAt: true,
+  menuItem: { select: customerMenuItemSelect },
+  modifiers: {
+    select: {
+      id: true,
+      orderItemId: true,
+      modifierId: true,
+      quantity: true,
+      unitPrice: true,
+      totalPrice: true,
+      createdAt: true,
+      modifier: { select: customerModifierSelect },
+    },
+  },
+});
+
+const customerLocationSelect = Prisma.validator<Prisma.LocationSelect>()({
+  id: true,
+  name: true,
+  slug: true,
+  address1: true,
+  address2: true,
+  city: true,
+  state: true,
+  zipCode: true,
+  phone: true,
+  email: true,
+  timezone: true,
+  latitude: true,
+  longitude: true,
+});
+
+const customerOrderScalarSelect = {
+  id: true,
+  orderNumber: true,
+  userId: true,
+  locationId: true,
+  addressId: true,
+  orderType: true,
+  status: true,
+  subtotal: true,
+  tax: true,
+  deliveryFee: true,
+  tip: true,
+  discount: true,
+  loyaltyDiscount: true,
+  total: true,
+  customerName: true,
+  customerEmail: true,
+  customerPhone: true,
+  deliveryAddress1: true,
+  deliveryAddress2: true,
+  deliveryCity: true,
+  deliveryState: true,
+  deliveryZipCode: true,
+  deliveryNotes: true,
+  scheduledFor: true,
+  estimatedReadyAt: true,
+  estimatedDeliveryAt: true,
+  preparedAt: true,
+  completedAt: true,
+  cancelledAt: true,
+  specialInstructions: true,
+  createdAt: true,
+  updatedAt: true,
+} as const;
+
+export const customerOrderSelect = Prisma.validator<Prisma.OrderSelect>()({
+  ...customerOrderScalarSelect,
+  items: { select: customerOrderItemSelect },
+  payments: {
+    select: {
+      id: true,
+      transactionType: true,
+      status: true,
+      amount: true,
+      currency: true,
+      cardLast4: true,
+      cardBrand: true,
+      createdAt: true,
+      updatedAt: true,
+    },
+  },
+  statusHistory: {
+    select: {
+      id: true,
+      status: true,
+      note: true,
+      createdAt: true,
+    },
+    orderBy: { createdAt: 'desc' },
+  },
+});
+
+export const customerOrderMutationSelect = Prisma.validator<Prisma.OrderSelect>()({
+  ...customerOrderScalarSelect,
+  items: { select: customerOrderItemSelect },
+});
+
+export const customerOrderSummarySelect = Prisma.validator<Prisma.OrderSelect>()({
+  ...customerOrderScalarSelect,
+  items: { select: customerOrderItemSelect },
+  location: { select: customerLocationSelect },
+});
+
+export class OrderCancellationStateError extends Error {
+  constructor() {
+    super('Order cannot be cancelled at this stage');
+    this.name = 'OrderCancellationStateError';
+  }
+}
+
 export class OrdersService {
-  async createOrder(userId: string | undefined, orderData: CreateOrderInput) {
+  async createOrder(userId: string, orderData: CreateOrderInput) {
     const { locationId, orderType, items, ...customerData } = orderData;
 
     // Validate location
@@ -76,7 +215,7 @@ export class OrdersService {
     }
 
     const tax = calculateTax(subtotal, config.TAX_RATE);
-    const deliveryFee = orderType === 'delivery' ? orderData.deliveryAddress ? 5.99 : 0 : 0;
+    const deliveryFee = orderType === 'delivery' ? (orderData.deliveryAddress ? 5.99 : 0) : 0;
     const tip = orderData.tip || 0;
     const discount = 0;
     const loyaltyDiscount = 0; // Calculate if points redeemed
@@ -84,7 +223,7 @@ export class OrdersService {
     const total = calculateOrderTotal(subtotal, tax, deliveryFee, tip, discount + loyaltyDiscount);
 
     // Generate order number
-    const orderNumber = await this.generateOrderNumber();
+    const orderNumber = this.generateOrderNumber();
 
     // Create order
     const order = await prisma.order.create({
@@ -122,18 +261,7 @@ export class OrdersService {
           },
         },
       },
-      include: {
-        items: {
-          include: {
-            menuItem: true,
-            modifiers: {
-              include: {
-                modifier: true,
-              },
-            },
-          },
-        },
-      },
+      select: customerOrderMutationSelect,
     });
 
     // Send confirmation email
@@ -144,28 +272,13 @@ export class OrdersService {
     return order;
   }
 
-  async getOrder(orderId: string, userId?: string) {
+  async getOrderForUser(orderId: string, userId: string) {
     const order = await prisma.order.findFirst({
       where: {
         id: orderId,
-        ...(userId ? { userId } : {}),
+        userId,
       },
-      include: {
-        items: {
-          include: {
-            menuItem: true,
-            modifiers: {
-              include: {
-                modifier: true,
-              },
-            },
-          },
-        },
-        payments: true,
-        statusHistory: {
-          orderBy: { createdAt: 'desc' },
-        },
-      },
+      select: customerOrderSelect,
     });
 
     return order;
@@ -177,14 +290,7 @@ export class OrdersService {
     const [orders, total] = await Promise.all([
       prisma.order.findMany({
         where: { userId },
-        include: {
-          items: {
-            include: {
-              menuItem: true,
-            },
-          },
-          location: true,
-        },
+        select: customerOrderSummarySelect,
         orderBy: { createdAt: 'desc' },
         skip,
         take: limit,
@@ -237,26 +343,47 @@ export class OrdersService {
     return order;
   }
 
-  async cancelOrder(orderId: string, userId?: string, reason?: string) {
+  async cancelOrderForUser(orderId: string, userId: string, reason?: string) {
     const order = await prisma.order.findFirst({
       where: {
         id: orderId,
-        ...(userId ? { userId } : {}),
+        userId,
       },
+      select: { status: true },
     });
 
     if (!order) {
-      throw new Error('Order not found');
+      return null;
     }
 
     if (!['pending', 'confirmed'].includes(order.status)) {
-      throw new Error('Order cannot be cancelled at this stage');
+      throw new OrderCancellationStateError();
     }
 
-    return this.updateOrderStatus(orderId, 'cancelled', reason, userId);
+    const cancelledOrder = await prisma.order.update({
+      where: { id: orderId, userId },
+      data: {
+        status: 'cancelled',
+        cancelledAt: new Date(),
+        statusHistory: {
+          create: {
+            status: 'cancelled',
+            note: reason,
+            changedBy: userId,
+          },
+        },
+      },
+      select: customerOrderMutationSelect,
+    });
+
+    await emailService.sendOrderStatusUpdate(cancelledOrder, 'cancelled').catch(() => {
+      console.error('Failed to send status update email');
+    });
+
+    return cancelledOrder;
   }
 
-  private async generateOrderNumber(): Promise<string> {
+  private generateOrderNumber(): string {
     const date = new Date();
     const dateStr = date.toISOString().slice(0, 10).replace(/-/g, '');
     const random = Math.floor(Math.random() * 10000)
@@ -268,10 +395,10 @@ export class OrdersService {
   async getLocationOrders(locationId: string, status?: string, page = 1, limit = 50) {
     const skip = (page - 1) * limit;
 
-    const where: any = { locationId };
-    if (status) {
-      where.status = status;
-    }
+    const where: Prisma.OrderWhereInput = {
+      locationId,
+      ...(status ? { status } : {}),
+    };
 
     const [orders, total] = await Promise.all([
       prisma.order.findMany({

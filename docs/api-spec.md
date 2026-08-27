@@ -134,7 +134,9 @@ Get menu item details.
 
 ### POST /api/orders
 
-Create a new order.
+Create a new order. Authentication is required. The order is always attached to the
+authenticated user; owner IDs supplied by a client are ignored. Anonymous order creation is
+not supported and returns `401 Unauthorized`.
 
 **Request:**
 ```json
@@ -184,7 +186,14 @@ Create a new order.
 
 ### GET /api/orders/:orderId
 
-Get order details.
+Get order details for the authenticated owner. An order owned by another user, a legacy order
+with no `userId`, and a nonexistent order all return the same `404 Not Found` response.
+
+Customer responses contain display-safe item and modifier data, status history without
+`changedBy`, and payment summaries limited to `id`, `transactionType`, `status`, `amount`,
+`currency`, `cardLast4`, `cardBrand`, `createdAt`, and `updatedAt`. They do not include payment
+provider tokens or diagnostics, request IP address or user agent, internal payment errors, or
+internal POS identifiers and synchronization fields.
 
 **Response:** `200 OK`
 ```json
@@ -195,7 +204,7 @@ Get order details.
     "orderNumber": "202401211234",
     "status": "preparing",
     "items": [ /* Order items with modifiers */ ],
-    "payments": [ /* Payment transactions */ ],
+    "payments": [ /* Customer-safe payment summaries */ ],
     "statusHistory": [ /* Status change history */ ]
   }
 }
@@ -203,7 +212,9 @@ Get order details.
 
 ### POST /api/orders/:orderId/payment
 
-Process payment for an order.
+Process payment for an order owned by the authenticated user. Authentication and exact
+order-owner matching occur before the payment provider is called. A foreign or nonexistent
+order returns the same `404 Not Found` response.
 
 **Request:**
 ```json
@@ -227,7 +238,10 @@ Process payment for an order.
 
 ### POST /api/orders/:orderId/cancel
 
-Cancel an order.
+Cancel a `pending` or `confirmed` order owned by the authenticated user. Authentication is
+required. A foreign or nonexistent order returns the same `404 Not Found` response. An order
+in any other state returns `400 Bad Request`. The response uses a customer-safe order
+representation.
 
 **Request:**
 ```json
@@ -246,7 +260,9 @@ Cancel an order.
 
 ### GET /api/orders/user/me
 
-Get current user's orders (requires authentication).
+Get only the authenticated user's orders. Authentication is required, and a user ID cannot be
+provided through the path, query, or request body. List entries exclude internal payment,
+provider, network, and POS fields. Legacy orders with no `userId` are not returned.
 
 **Query Parameters:**
 - `page`: Page number (default: 1)

@@ -97,6 +97,32 @@ Prisma schema at main commit `7b6f32c9b4420a9d6de003f7033bd94cb8b45ea9`.
 this ADR. Existing databases must first prove baseline equivalence and then mark
 only the baseline migration as applied before deploying the second migration.
 
+Every existing target must inspect `_prisma_migrations` before baselining. An
+absent or empty history still requires exact baseline schema equivalence. Any
+existing history row blocks baselining until every entry is explicitly reviewed
+and reconciled; the new baseline must never be placed over unexplained history,
+and migration-history rows must never be manually deleted or rewritten.
+
+The original foundation SQL used a top-level explicit transaction. Its actual
+Prisma 5.22 duplicate-deploy test showed that the guard exception aborted that
+transaction, PostgreSQL `25P02` masked the custom exception, and the failed
+`_prisma_migrations.logs` value was null. That was an operational auditability
+defect, so the migration was corrected before merge or deployment.
+
+The corrected migration is one top-level atomic PostgreSQL `DO` statement. The
+`ACCESS EXCLUSIVE` lock, unchanged duplicate guard, eleven column additions,
+backfill, and four indexes remain one atomic unit. No exception handler catches
+the guard failure: PostgreSQL rolls back the statement without partial data or
+schema changes, while Prisma can record the original custom error in the failed
+migration history.
+
+A duplicate failure is an intentional safety gate, not an automatically retried
+condition. Recovery requires manual payment review, proof that the database
+statement rolled back, a separately approved data correction, and then
+`migrate resolve --rolled-back` followed by `migrate deploy`. Operations must not
+automatically select or change a payment, use `--applied` for the failed
+foundation migration, or restore traffic before every verification passes.
+
 ## Runtime boundary
 
 This decision adds persistence capability only. It does not change a payment route,

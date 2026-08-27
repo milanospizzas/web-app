@@ -49,6 +49,18 @@ const customerOrderItemSelect = Prisma.validator<Prisma.OrderItemSelect>()({
   },
 });
 
+const customerOrderSummaryItemSelect = Prisma.validator<Prisma.OrderItemSelect>()({
+  id: true,
+  orderId: true,
+  menuItemId: true,
+  quantity: true,
+  unitPrice: true,
+  totalPrice: true,
+  specialInstructions: true,
+  createdAt: true,
+  menuItem: { select: customerMenuItemSelect },
+});
+
 const customerLocationSelect = Prisma.validator<Prisma.LocationSelect>()({
   id: true,
   name: true,
@@ -134,7 +146,7 @@ export const customerOrderMutationSelect = Prisma.validator<Prisma.OrderSelect>(
 
 export const customerOrderSummarySelect = Prisma.validator<Prisma.OrderSelect>()({
   ...customerOrderScalarSelect,
-  items: { select: customerOrderItemSelect },
+  items: { select: customerOrderSummaryItemSelect },
   location: { select: customerLocationSelect },
 });
 

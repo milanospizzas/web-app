@@ -247,6 +247,7 @@ describe('customer order Prisma projections', () => {
     expect(findForbiddenKey(customerOrderSelect, forbiddenKeys)).toBeNull();
     expect(findForbiddenKey(customerOrderMutationSelect, forbiddenKeys)).toBeNull();
     expect(findForbiddenKey(customerOrderSummarySelect, forbiddenKeys)).toBeNull();
+    expect(customerOrderSummarySelect.items.select).not.toHaveProperty('modifiers');
     expect(customerOrderSelect.payments.select).toEqual({
       id: true,
       transactionType: true,

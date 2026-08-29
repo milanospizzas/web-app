@@ -7,16 +7,20 @@ import { config } from './config';
 import { errorHandler } from './shared/middleware/error.middleware';
 import { authRoutes } from './modules/auth/auth.routes';
 import { menuRoutes } from './modules/menu/menu.routes';
-import { posRoutes } from './modules/pos/pos.routes';
 
 type OrdersRouteModule = {
   ordersRoutes: FastifyPluginCallback;
+};
+
+type PosRouteModule = {
+  posRoutes: FastifyPluginCallback;
 };
 
 export interface BuildAppOptions {
   customOrderingEnabled?: boolean;
   customPaymentEnabled?: boolean;
   loadOrdersRoutes?: () => Promise<OrdersRouteModule>;
+  loadPosRoutes?: () => Promise<PosRouteModule>;
 }
 
 export async function buildApp(options: BuildAppOptions = {}): Promise<FastifyInstance> {
@@ -58,11 +62,16 @@ export async function buildApp(options: BuildAppOptions = {}): Promise<FastifyIn
 
   await app.register(authRoutes, { prefix: '/api/auth' });
   await app.register(menuRoutes, { prefix: '/api/menu' });
-  await app.register(posRoutes, { prefix: '/api/pos' });
 
   const customOrderingEnabled =
     options.customOrderingEnabled ?? config.CUSTOM_ORDERING_ENABLED;
   const customPaymentEnabled = options.customPaymentEnabled ?? config.CUSTOM_PAYMENT_ENABLED;
+
+  if (customOrderingEnabled) {
+    const loadPosRoutes = options.loadPosRoutes ?? (() => import('./modules/pos/pos.routes'));
+    const { posRoutes } = await loadPosRoutes();
+    await app.register(posRoutes, { prefix: '/api/pos' });
+  }
 
   if (customOrderingEnabled && customPaymentEnabled) {
     const loadOrdersRoutes =

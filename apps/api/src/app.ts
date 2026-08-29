@@ -5,8 +5,14 @@ import fastifyHelmet from '@fastify/helmet';
 import fastifyRateLimit from '@fastify/rate-limit';
 import { config } from './config';
 import { errorHandler } from './shared/middleware/error.middleware';
-import { authRoutes } from './modules/auth/auth.routes';
-import { menuRoutes } from './modules/menu/menu.routes';
+
+type AuthRouteModule = {
+  authRoutes: FastifyPluginCallback;
+};
+
+type MenuRouteModule = {
+  menuRoutes: FastifyPluginCallback;
+};
 
 type OrdersRouteModule = {
   ordersRoutes: FastifyPluginCallback;
@@ -19,6 +25,9 @@ type PosRouteModule = {
 export interface BuildAppOptions {
   customOrderingEnabled?: boolean;
   customPaymentEnabled?: boolean;
+  accountsEnabled?: boolean;
+  loadAuthRoutes?: () => Promise<AuthRouteModule>;
+  loadMenuRoutes?: () => Promise<MenuRouteModule>;
   loadOrdersRoutes?: () => Promise<OrdersRouteModule>;
   loadPosRoutes?: () => Promise<PosRouteModule>;
 }
@@ -60,17 +69,27 @@ export async function buildApp(options: BuildAppOptions = {}): Promise<FastifyIn
     services: { database: 'connected', redis: 'connected' },
   }));
 
-  await app.register(authRoutes, { prefix: '/api/auth' });
-  await app.register(menuRoutes, { prefix: '/api/menu' });
-
   const customOrderingEnabled =
     options.customOrderingEnabled ?? config.CUSTOM_ORDERING_ENABLED;
   const customPaymentEnabled = options.customPaymentEnabled ?? config.CUSTOM_PAYMENT_ENABLED;
+  const accountsEnabled = options.accountsEnabled ?? config.ACCOUNTS_ENABLED;
 
   if (customOrderingEnabled) {
+    const loadMenuRoutes = options.loadMenuRoutes ?? (() => import('./modules/menu/menu.routes'));
     const loadPosRoutes = options.loadPosRoutes ?? (() => import('./modules/pos/pos.routes'));
-    const { posRoutes } = await loadPosRoutes();
+    const [{ menuRoutes }, { posRoutes }] = await Promise.all([
+      loadMenuRoutes(),
+      loadPosRoutes(),
+    ]);
+
+    await app.register(menuRoutes, { prefix: '/api/menu' });
     await app.register(posRoutes, { prefix: '/api/pos' });
+  }
+
+  if (customOrderingEnabled && accountsEnabled) {
+    const loadAuthRoutes = options.loadAuthRoutes ?? (() => import('./modules/auth/auth.routes'));
+    const { authRoutes } = await loadAuthRoutes();
+    await app.register(authRoutes, { prefix: '/api/auth' });
   }
 
   if (customOrderingEnabled && customPaymentEnabled) {

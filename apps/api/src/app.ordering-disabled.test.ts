@@ -19,18 +19,34 @@ const syntheticPosRoutes: FastifyPluginCallback = (app, _options, done) => {
   done();
 };
 
+const syntheticAuthRoutes: FastifyPluginCallback = (app, _options, done) => {
+  app.post('/magic-link', async () => ({ accepted: true }));
+  done();
+};
+
+const syntheticMenuRoutes: FastifyPluginCallback = (app, _options, done) => {
+  app.get('/', async () => ({ items: [] }));
+  done();
+};
+
 describe('custom ordering and payment registration gate', () => {
-  it('defaults both custom ordering flags to false', () => {
+  it('defaults every dormant public API feature flag to false', () => {
     expect(config.CUSTOM_ORDERING_ENABLED).toBe(false);
     expect(config.CUSTOM_PAYMENT_ENABLED).toBe(false);
+    expect(config.ACCOUNTS_ENABLED).toBe(false);
   });
 
   it('does not load or register custom order/payment routes while disabled', async () => {
+    const loadAuthRoutes = vi.fn(async () => ({ authRoutes: syntheticAuthRoutes }));
+    const loadMenuRoutes = vi.fn(async () => ({ menuRoutes: syntheticMenuRoutes }));
     const loadOrdersRoutes = vi.fn(async () => ({ ordersRoutes: syntheticOrdersRoutes }));
     const loadPosRoutes = vi.fn(async () => ({ posRoutes: syntheticPosRoutes }));
     const app = await buildApp({
       customOrderingEnabled: false,
       customPaymentEnabled: false,
+      accountsEnabled: false,
+      loadAuthRoutes,
+      loadMenuRoutes,
       loadOrdersRoutes,
       loadPosRoutes,
     });
@@ -47,9 +63,41 @@ describe('custom ordering and payment registration gate', () => {
       });
 
       expect(response.statusCode).toBe(404);
+      expect(loadAuthRoutes).not.toHaveBeenCalled();
+      expect(loadMenuRoutes).not.toHaveBeenCalled();
       expect(loadOrdersRoutes).not.toHaveBeenCalled();
       expect(loadPosRoutes).not.toHaveBeenCalled();
       expect(paymentMocks.processSale).not.toHaveBeenCalled();
+    } finally {
+      await app.close();
+    }
+  });
+
+  it('does not expose dormant account or database-backed menu routes by default', async () => {
+    const loadAuthRoutes = vi.fn(async () => ({ authRoutes: syntheticAuthRoutes }));
+    const loadMenuRoutes = vi.fn(async () => ({ menuRoutes: syntheticMenuRoutes }));
+    const app = await buildApp({
+      customOrderingEnabled: false,
+      customPaymentEnabled: false,
+      accountsEnabled: false,
+      loadAuthRoutes,
+      loadMenuRoutes,
+    });
+
+    try {
+      const [authResponse, menuResponse] = await Promise.all([
+        app.inject({
+          method: 'POST',
+          url: '/api/auth/magic-link',
+          payload: { email: 'test@example.com' },
+        }),
+        app.inject({ method: 'GET', url: '/api/menu' }),
+      ]);
+
+      expect(authResponse.statusCode).toBe(404);
+      expect(menuResponse.statusCode).toBe(404);
+      expect(loadAuthRoutes).not.toHaveBeenCalled();
+      expect(loadMenuRoutes).not.toHaveBeenCalled();
     } finally {
       await app.close();
     }
@@ -74,27 +122,63 @@ describe('custom ordering and payment registration gate', () => {
   });
 
   it('restores POS registration with custom ordering alone while payment stays disabled', async () => {
+    const loadAuthRoutes = vi.fn(async () => ({ authRoutes: syntheticAuthRoutes }));
+    const loadMenuRoutes = vi.fn(async () => ({ menuRoutes: syntheticMenuRoutes }));
     const loadPosRoutes = vi.fn(async () => ({ posRoutes: syntheticPosRoutes }));
     const loadOrdersRoutes = vi.fn(async () => ({ ordersRoutes: syntheticOrdersRoutes }));
     const app = await buildApp({
       customOrderingEnabled: true,
       customPaymentEnabled: false,
+      accountsEnabled: false,
+      loadAuthRoutes,
+      loadMenuRoutes,
       loadPosRoutes,
       loadOrdersRoutes,
     });
 
     try {
-      const posResponse = await app.inject({ method: 'GET', url: '/api/pos/synthetic-status' });
+      const [authResponse, menuResponse, posResponse] = await Promise.all([
+        app.inject({ method: 'POST', url: '/api/auth/magic-link' }),
+        app.inject({ method: 'GET', url: '/api/menu' }),
+        app.inject({ method: 'GET', url: '/api/pos/synthetic-status' }),
+      ]);
       const paymentResponse = await app.inject({
         method: 'POST',
         url: '/api/orders/synthetic-order-id/payment',
       });
 
+      expect(authResponse.statusCode).toBe(404);
+      expect(menuResponse.statusCode).toBe(200);
       expect(posResponse.statusCode).toBe(200);
       expect(paymentResponse.statusCode).toBe(404);
+      expect(loadAuthRoutes).not.toHaveBeenCalled();
+      expect(loadMenuRoutes).toHaveBeenCalledOnce();
       expect(loadPosRoutes).toHaveBeenCalledOnce();
       expect(loadOrdersRoutes).not.toHaveBeenCalled();
       expect(paymentMocks.processSale).not.toHaveBeenCalled();
+    } finally {
+      await app.close();
+    }
+  });
+
+  it('registers account routes only when ordering and accounts are explicitly enabled', async () => {
+    const loadAuthRoutes = vi.fn(async () => ({ authRoutes: syntheticAuthRoutes }));
+    const loadMenuRoutes = vi.fn(async () => ({ menuRoutes: syntheticMenuRoutes }));
+    const loadPosRoutes = vi.fn(async () => ({ posRoutes: syntheticPosRoutes }));
+    const app = await buildApp({
+      customOrderingEnabled: true,
+      customPaymentEnabled: false,
+      accountsEnabled: true,
+      loadAuthRoutes,
+      loadMenuRoutes,
+      loadPosRoutes,
+    });
+
+    try {
+      const response = await app.inject({ method: 'POST', url: '/api/auth/magic-link' });
+
+      expect(response.statusCode).toBe(200);
+      expect(loadAuthRoutes).toHaveBeenCalledOnce();
     } finally {
       await app.close();
     }

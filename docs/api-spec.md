@@ -1,6 +1,8 @@
 # Milano's Pizza - API Specification
 
-Base URL: `https://api.milanos.pizza` (Production) | `http://localhost:3001` (Development)
+> **Deferred API notice:** No production API base URL is approved for public ordering or payment. The endpoint descriptions below are historical development material; custom ordering/payment routes are unregistered while their default-false gates remain off.
+
+Development base URL: `http://localhost:3001`
 
 ## Authentication
 
@@ -14,7 +16,7 @@ Send magic link to email.
 ```json
 {
   "email": "user@example.com",
-  "redirectUrl": "https://milanos.pizza/menu" // optional
+  "redirectUrl": "https://www.milanospizzas.com/menu" // optional
 }
 ```
 

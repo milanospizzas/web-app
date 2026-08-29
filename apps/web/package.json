@@ -1,13 +1,14 @@
 {
   "name": "@milanos/web",
   "version": "1.0.0",
-  "description": "Frontend for Milano's Pizza",
+  "description": "Frontend for Milano's Pizzas",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "next start",
+    "start": "node scripts/serve-static.mjs",
     "lint": "next lint",
-    "type-check": "tsc --noEmit"
+    "type-check": "tsc --noEmit",
+    "validate:static": "node scripts/validate-static.mjs"
   },
   "dependencies": {
     "@milanos/shared": "workspace:*",

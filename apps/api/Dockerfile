@@ -1,47 +1,28 @@
-# Development Dockerfile for API
+# Development dependencies and generated Prisma client
 FROM node:20-alpine AS development
 
 WORKDIR /app
+RUN corepack enable && corepack prepare pnpm@9 --activate
 
-# Copy package files
-COPY package*.json ./
-COPY apps/api/package*.json ./apps/api/
-COPY packages/shared/package*.json ./packages/shared/
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+COPY apps/api/package.json ./apps/api/
+COPY packages/shared/package.json ./packages/shared/
+RUN pnpm install --frozen-lockfile
 
-# Install dependencies
-RUN npm install
-
-# Copy source code
 COPY . .
-
-# Generate Prisma client
-RUN cd apps/api && npx prisma generate
+RUN pnpm --filter @milanos/api db:generate
 
 EXPOSE 3001
+CMD ["pnpm", "--filter", "@milanos/api", "dev"]
 
-CMD ["npm", "run", "dev", "--workspace=@milanos/api"]
+# Build the dormant API without relying on host-generated artifacts.
+FROM development AS builder
+RUN pnpm --filter @milanos/shared build
+RUN pnpm --filter @milanos/api build
 
-# Production Dockerfile
-FROM node:20-alpine AS production
-
-WORKDIR /app
-
-# Copy package files
-COPY package*.json ./
-COPY apps/api/package*.json ./apps/api/
-COPY packages/shared/package*.json ./packages/shared/
-
-# Install production dependencies
-RUN npm ci --only=production
-
-# Copy built files
-COPY --from=development /app/apps/api/dist ./apps/api/dist
-COPY --from=development /app/packages/shared/dist ./packages/shared/dist
-COPY --from=development /app/apps/api/prisma ./apps/api/prisma
-
-# Generate Prisma client
-RUN cd apps/api && npx prisma generate
-
+# The API remains default-off for custom ordering/payment through runtime flags.
+FROM builder AS production
+ENV NODE_ENV=production
+USER node
 EXPOSE 3001
-
 CMD ["node", "apps/api/dist/index.js"]

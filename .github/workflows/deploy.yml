@@ -1,14 +1,18 @@
 name: Deploy
 
 on:
-  push:
-    branches: [main]
+  workflow_dispatch:
+    inputs:
+      confirm:
+        description: 'Type DEPLOY after production launch approval'
+        required: true
+        type: string
 
 jobs:
   deploy-api:
     name: Deploy API to Sevalla
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main'
+    if: github.ref == 'refs/heads/main' && inputs.confirm == 'DEPLOY'
 
     steps:
       - name: Checkout code
@@ -19,14 +23,19 @@ jobs:
         with:
           node-version: '20'
 
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
       - name: Install dependencies
-        run: npm ci
+        run: pnpm install --frozen-lockfile
 
       - name: Build packages
         run: |
-          npm run build --workspace=@milanos/shared
-          npm run db:generate --workspace=@milanos/api
-          npm run build --workspace=@milanos/api
+          pnpm --filter @milanos/shared build
+          pnpm --filter @milanos/api db:generate
+          pnpm --filter @milanos/api build
 
       - name: Deploy to Sevalla
         run: |
@@ -38,7 +47,7 @@ jobs:
   deploy-web:
     name: Deploy Web to AWS Amplify
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main'
+    if: github.ref == 'refs/heads/main' && inputs.confirm == 'DEPLOY'
 
     steps:
       - name: Checkout code
@@ -49,16 +58,27 @@ jobs:
         with:
           node-version: '20'
 
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
       - name: Install dependencies
-        run: npm ci
+        run: pnpm install --frozen-lockfile
 
       - name: Build packages
         run: |
-          npm run build --workspace=@milanos/shared
-          npm run build --workspace=@milanos/web
+          pnpm --filter @milanos/shared build
+          pnpm --filter @milanos/web build
         env:
-          NEXT_PUBLIC_API_URL: ${{ secrets.PRODUCTION_API_URL }}
-          NEXT_PUBLIC_SHIFT4_I4GO_URL: ${{ secrets.SHIFT4_I4GO_URL }}
+          SITE_ENV: production
+          ORDER_PROVIDER: skytab
+          ORDER_MODE: redirect
+          SKYTAB_ORDER_URL: https://online.skytab.com/29f9af1c8689260fadade27c64cb9e55
+          SKYTAB_IFRAME_ENABLED: 'false'
+          CUSTOM_ORDERING_ENABLED: 'false'
+          CUSTOM_PAYMENT_ENABLED: 'false'
+          ANALYTICS_ENABLED: 'false'
 
       - name: Deploy to AWS Amplify
         uses: aws-actions/configure-aws-credentials@v4

@@ -1,16 +1,21 @@
-# Milano's Pizza - Web App
+# Milano's Pizzas - Public Website
 
-> State-of-the-art restaurant e-commerce + online ordering platform for milanos.pizza
-> Built for conversion, SEO dominance, and operational excellence.
+> Canonical public domain: `https://www.milanospizzas.com`
+
+## Current implementation boundary
+
+The public Next.js site owns Milano's branding, SEO, first-party menu discovery, local content, catering inquiries, and conversion CTAs. Every Order Online CTA uses the permanent internal `/order` route, which currently continues to the approved SkyTab storefront.
+
+Custom ordering, custom payment, POS API routes, loyalty collection, marketing collection, unverified specials, and production iframe ordering are disabled by default. Historical custom checkout, Shift4, POS, loyalty, and API material elsewhere in this repository describes deferred work and must not be treated as active production architecture.
 
 ## 🎯 Mission
 
-Build a "money-making machine" restaurant ordering site that:
-- Increases online sales + repeat customers via best-in-class UX
-- Ranks #1 locally for pizza + Italian food searches
-- Integrates deeply with Shift4 SkyTab POS and Shift4 Payments
-- Provides custom-branded ordering (NOT embedded SkyTab)
-- Optimized for mobile-first, fast (Core Web Vitals), SEO-dominant
+Build a mobile-first restaurant site that:
+- Makes direct menu discovery and ordering easy
+- Publishes accurate local business and menu content
+- Keeps all public order links stable through `/order`
+- Leaves the uncertified custom ordering and payment implementation fail-closed
+- Supports static rendering, structured data, and fast initial loads
 
 ## 🏗️ Architecture
 
@@ -40,10 +45,10 @@ web-app/
 - PostgreSQL (users, orders, loyalty, content, menu mirror)
 - Redis (sessions, rate limiting, caching)
 
-**Payments & POS**
-- Shift4 i4Go (iframe tokenization - CHD never touches our servers)
-- Shift4 REST API (sale, refund, void, invoice flows)
-- SkyTab POS integration (menu sync, order injection, status, 86'ing)
+**Ordering boundary**
+- SkyTab storefront redirect through `/order`
+- Custom ordering and payment routes disabled by default
+- Historical Shift4/i4Go and POS integration code deferred pending a current plan, credentials, certification, and approval
 
 **Email & Marketing**
 - AWS SES (transactional emails)
@@ -58,7 +63,7 @@ web-app/
 ### Prerequisites
 ```bash
 node >= 20.0.0
-npm >= 10.0.0
+pnpm 9
 postgresql >= 15
 redis >= 7
 ```
@@ -69,7 +74,7 @@ redis >= 7
 ```bash
 git clone https://github.com/milanospizzas/web-app.git
 cd web-app
-npm install
+pnpm install
 ```
 
 2. **Set up environment variables**
@@ -270,15 +275,15 @@ npm run test:e2e           # Full ordering flow
 ```
 
 ### Shift4 Certification Tests
-- See `docs/shift4-test-script.md` for certification test cases
-- Covers: AVS/CVV scenarios, invoice flows, timeout handling
+- Deferred. No current merchant Integration Plan or approved certification script is committed.
+- Do not run or resume custom payment work until Shift4 supplies the required current materials and approval.
 
 ## 🚀 Deployment
 
 ### Frontend (AWS Amplify)
 ```bash
-# Amplify auto-deploys on push to main
-# Preview builds on PR branches
+# No repository workflow deploys automatically.
+# Production release requires explicit owner approval and the manual DEPLOY gate.
 ```
 
 ### Backend (Sevalla)
@@ -298,7 +303,8 @@ npm run db:migrate:production
 ## 🔧 Configuration
 
 ### Cloudflare Setup
-- DNS: `milanos.pizza` → Amplify, `api.milanos.pizza` → Sevalla
+- Production canonical: `https://www.milanospizzas.com`; configure the bare domain to permanently redirect to `www` only after launch approval
+- No production API hostname is approved for public ordering or payment
 - SSL: Full (strict)
 - WAF: OWASP core ruleset + custom rules
 - Rate limiting: Auth + checkout endpoints
@@ -308,19 +314,23 @@ npm run db:migrate:production
 
 **Frontend**
 ```bash
-NEXT_PUBLIC_API_URL=https://api.milanos.pizza
-NEXT_PUBLIC_I4GO_SERVER=https://checkout.shift4test.com
-NEXT_PUBLIC_MAPS_API_KEY=
+SITE_ENV=staging
+ORDER_PROVIDER=skytab
+ORDER_MODE=redirect
+SKYTAB_ORDER_URL=https://online.skytab.com/29f9af1c8689260fadade27c64cb9e55
+SKYTAB_IFRAME_ENABLED=false
+CUSTOM_ORDERING_ENABLED=false
+CUSTOM_PAYMENT_ENABLED=false
+ACCOUNTS_ENABLED=false
+ANALYTICS_ENABLED=false
 ```
 
 **Backend**
 ```bash
 DATABASE_URL=postgresql://...
 REDIS_URL=redis://...
-SHIFT4_CLIENT_GUID=
-SHIFT4_API_BASE=https://api.shift4test.com
 SES_REGION=us-east-1
-SES_FROM_EMAIL=orders@milanos.pizza
+SES_FROM_EMAIL=
 JWT_SECRET=
 ```
 
@@ -329,7 +339,7 @@ JWT_SECRET=
 - [Architecture Overview](docs/architecture.md)
 - [Database Schema](docs/database-schema.md)
 - [API Specification](docs/api-spec.md)
-- [Shift4 Integration](docs/shift4-integration.md)
+- Shift4 integration documentation: pending an updated plan from Shift4
 - [POS Integration](docs/pos-integration.md)
 - [Loyalty System](docs/loyalty-system.md)
 - [SEO Strategy](docs/seo-strategy.md)
@@ -368,4 +378,4 @@ test: add checkout integration tests
 
 ## 📝 License
 
-Proprietary - Milano's Pizza © 2026
+Proprietary - Milano's Pizzas © 2026

@@ -2,7 +2,7 @@
   "name": "milanos-pizza-web-app",
   "version": "1.0.0",
   "private": true,
-  "description": "State-of-the-art restaurant e-commerce + online ordering platform for Milano's Pizza",
+  "description": "Public website and deferred ordering platform for Milano's Pizzas",
   "workspaces": [
     "apps/*",
     "packages/*"
@@ -61,6 +61,6 @@
     "fastify",
     "postgresql"
   ],
-  "author": "Milano's Pizza",
+  "author": "Milano's Pizzas",
   "license": "UNLICENSED"
 }

@@ -4,11 +4,12 @@ frontend:
     preBuild:
       commands:
         - npm install -g pnpm@9
-        - pnpm install
+        - pnpm install --frozen-lockfile
     build:
       commands:
-        - cd apps/web
-        - pnpm run build
+        - pnpm --filter @milanos/shared build
+        - SITE_ENV=staging ORDER_PROVIDER=skytab ORDER_MODE=redirect SKYTAB_ORDER_URL=https://online.skytab.com/29f9af1c8689260fadade27c64cb9e55 SKYTAB_IFRAME_ENABLED=false CUSTOM_ORDERING_ENABLED=false CUSTOM_PAYMENT_ENABLED=false ANALYTICS_ENABLED=false pnpm --filter @milanos/web build
+        - pnpm --filter @milanos/web validate:static
   artifacts:
     baseDirectory: apps/web/out
     files:

@@ -1,53 +1,54 @@
-# Development Dockerfile for Web
+# Development image
 FROM node:20-alpine AS development
 
 WORKDIR /app
+RUN corepack enable && corepack prepare pnpm@9 --activate
 
-# Copy package files
-COPY package*.json ./
-COPY apps/web/package*.json ./apps/web/
-COPY packages/shared/package*.json ./packages/shared/
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+COPY apps/web/package.json ./apps/web/
+COPY packages/shared/package.json ./packages/shared/
+RUN pnpm install --frozen-lockfile
 
-# Install dependencies
-RUN npm install
-
-# Copy source code
 COPY . .
-
 EXPOSE 3000
+CMD ["pnpm", "--filter", "@milanos/web", "dev"]
 
-CMD ["npm", "run", "dev", "--workspace=@milanos/web"]
-
-# Production Dockerfile
+# Static export builder
 FROM node:20-alpine AS builder
 
 WORKDIR /app
+RUN corepack enable && corepack prepare pnpm@9 --activate
 
-# Copy package files
-COPY package*.json ./
-COPY apps/web/package*.json ./apps/web/
-COPY packages/shared/package*.json ./packages/shared/
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+COPY apps/web/package.json ./apps/web/
+COPY packages/shared/package.json ./packages/shared/
+RUN pnpm install --frozen-lockfile
 
-# Install dependencies
-RUN npm ci
-
-# Copy source code
 COPY . .
+ARG SITE_ENV=staging
+ARG ORDER_PROVIDER=skytab
+ARG ORDER_MODE=redirect
+ARG SKYTAB_ORDER_URL=
+ARG SKYTAB_IFRAME_ENABLED=false
+ARG CUSTOM_ORDERING_ENABLED=false
+ARG CUSTOM_PAYMENT_ENABLED=false
+ARG ANALYTICS_ENABLED=false
+ENV SITE_ENV=$SITE_ENV \
+    ORDER_PROVIDER=$ORDER_PROVIDER \
+    ORDER_MODE=$ORDER_MODE \
+    SKYTAB_ORDER_URL=$SKYTAB_ORDER_URL \
+    SKYTAB_IFRAME_ENABLED=$SKYTAB_IFRAME_ENABLED \
+    CUSTOM_ORDERING_ENABLED=$CUSTOM_ORDERING_ENABLED \
+    CUSTOM_PAYMENT_ENABLED=$CUSTOM_PAYMENT_ENABLED \
+    ANALYTICS_ENABLED=$ANALYTICS_ENABLED
+RUN pnpm --filter @milanos/shared build
+RUN pnpm --filter @milanos/web build
 
-# Build application
-RUN npm run build --workspace=@milanos/web
+# Static production server. Next output:'export' writes apps/web/out.
+FROM nginx:1.27-alpine AS production
 
-# Production stage
-FROM node:20-alpine AS production
+COPY apps/web/nginx.conf /etc/nginx/conf.d/default.conf
+COPY --from=builder /app/apps/web/out /usr/share/nginx/html
 
-WORKDIR /app
-
-# Copy built files
-COPY --from=builder /app/apps/web/.next ./apps/web/.next
-COPY --from=builder /app/apps/web/public ./apps/web/public
-COPY --from=builder /app/apps/web/package*.json ./apps/web/
-COPY --from=builder /app/node_modules ./node_modules
-
-EXPOSE 3000
-
-CMD ["npm", "run", "start", "--workspace=@milanos/web"]
+EXPOSE 80
+CMD ["nginx", "-g", "daemon off;"]

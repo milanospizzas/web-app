@@ -19,22 +19,26 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-          cache: 'npm'
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
 
       - name: Install dependencies
-        run: npm ci
+        run: pnpm install --frozen-lockfile
 
       - name: Build shared package
-        run: npm run build --workspace=@milanos/shared
+        run: pnpm --filter @milanos/shared build
 
       - name: Lint
-        run: npm run lint --if-present
+        run: pnpm -r --if-present lint
 
       - name: Type check API
-        run: npm run type-check --workspace=@milanos/api --if-present
+        run: pnpm --filter @milanos/api type-check
 
       - name: Type check Web
-        run: npm run type-check --workspace=@milanos/web --if-present
+        run: pnpm --filter @milanos/web type-check
 
   build-api:
     name: Build API
@@ -48,19 +52,26 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-          cache: 'npm'
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
 
       - name: Install dependencies
-        run: npm ci
+        run: pnpm install --frozen-lockfile
 
       - name: Build shared package
-        run: npm run build --workspace=@milanos/shared
+        run: pnpm --filter @milanos/shared build
 
       - name: Generate Prisma Client
-        run: npm run db:generate --workspace=@milanos/api
+        run: pnpm --filter @milanos/api db:generate
 
       - name: Build API
-        run: npm run build --workspace=@milanos/api
+        run: pnpm --filter @milanos/api build
+
+      - name: Test default-off API route boundary
+        run: pnpm --filter @milanos/api exec vitest run src/app.ordering-disabled.test.ts
 
   build-web:
     name: Build Web
@@ -74,16 +85,44 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-          cache: 'npm'
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
 
       - name: Install dependencies
-        run: npm ci
+        run: pnpm install --frozen-lockfile
 
       - name: Build shared package
-        run: npm run build --workspace=@milanos/shared
+        run: pnpm --filter @milanos/shared build
 
       - name: Build Web
-        run: npm run build --workspace=@milanos/web
+        run: pnpm --filter @milanos/web build
         env:
-          NEXT_PUBLIC_API_URL: http://localhost:3001
-          NEXT_PUBLIC_SHIFT4_I4GO_URL: https://i4go-sandbox.shift4.com/checkout
+          SITE_ENV: staging
+          ORDER_PROVIDER: skytab
+          ORDER_MODE: redirect
+          SKYTAB_ORDER_URL: https://online.skytab.com/29f9af1c8689260fadade27c64cb9e55
+          SKYTAB_IFRAME_ENABLED: 'false'
+          CUSTOM_ORDERING_ENABLED: 'false'
+          CUSTOM_PAYMENT_ENABLED: 'false'
+          ANALYTICS_ENABLED: 'false'
+
+      - name: Validate static site output
+        run: pnpm --filter @milanos/web validate:static
+
+      - name: Build production with hostile iframe settings
+        run: pnpm --filter @milanos/web build
+        env:
+          SITE_ENV: production
+          ORDER_PROVIDER: skytab
+          ORDER_MODE: iframe
+          SKYTAB_ORDER_URL: https://online.skytab.com/29f9af1c8689260fadade27c64cb9e55
+          SKYTAB_IFRAME_ENABLED: 'true'
+          CUSTOM_ORDERING_ENABLED: 'false'
+          CUSTOM_PAYMENT_ENABLED: 'false'
+          ANALYTICS_ENABLED: 'false'
+
+      - name: Validate production redirect safety
+        run: pnpm --filter @milanos/web validate:static

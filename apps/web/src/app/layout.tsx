@@ -1,58 +1,62 @@
-import type { Metadata } from 'next';
-import { Inter } from 'next/font/google';
+import type { Metadata, Viewport } from 'next';
+import { site } from '@/content/site';
+import { AnalyticsScripts } from '@/components/analytics/AnalyticsScripts';
 import '../styles/globals.css';
 
-const inter = Inter({ subsets: ['latin'], variable: '--font-inter' });
+const isProduction = process.env.SITE_ENV === 'production';
+const googleSiteVerification = process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION?.trim();
 
 export const metadata: Metadata = {
-  title: "Milano's Pizza - Authentic Italian Pizza Delivery",
-  description:
-    "Order delicious, authentic Italian pizza for delivery or pickup. Fresh ingredients, family recipes, and fast delivery.",
-  keywords: ['pizza', 'delivery', 'italian food', 'restaurant', 'milano'],
-  authors: [{ name: "Milano's Pizza" }],
+  metadataBase: new URL(site.url),
+  title: {
+    default: "Milano's Pizzas | Davie, Florida",
+    template: "%s | Milano's Pizzas",
+  },
+  description: site.description,
+  applicationName: site.name,
   openGraph: {
     type: 'website',
     locale: 'en_US',
-    url: 'https://milanos.pizza',
-    siteName: "Milano's Pizza",
-    title: "Milano's Pizza - Authentic Italian Pizza Delivery",
-    description: 'Order delicious, authentic Italian pizza for delivery or pickup.',
+    siteName: site.name,
+    title: "Milano's Pizzas | Davie, Florida",
+    description: site.description,
+    url: site.url,
     images: [
       {
-        url: '/og-image.jpg',
+        url: '/images/social/milanos-davie-og.jpg',
         width: 1200,
         height: 630,
-        alt: "Milano's Pizza",
+        alt: "The dining room and service counter at Milano's Pizzas in Davie",
       },
     ],
   },
   twitter: {
     card: 'summary_large_image',
-    title: "Milano's Pizza - Authentic Italian Pizza Delivery",
-    description: 'Order delicious, authentic Italian pizza for delivery or pickup.',
-    images: ['/og-image.jpg'],
+    title: "Milano's Pizzas | Davie, Florida",
+    description: site.description,
+    images: ['/images/social/milanos-davie-og.jpg'],
   },
-  robots: {
-    index: true,
-    follow: true,
-    googleBot: {
-      index: true,
-      follow: true,
-      'max-video-preview': -1,
-      'max-image-preview': 'large',
-      'max-snippet': -1,
-    },
-  },
+  robots: isProduction
+    ? { index: true, follow: true }
+    : { index: false, follow: false, nocache: true },
+  ...(googleSiteVerification
+    ? { verification: { google: googleSiteVerification } }
+    : {}),
 };
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  themeColor: '#8f1d25',
+};
+
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={inter.variable}>
-      <body>{children}</body>
+    <html lang="en">
+      <body>
+        {children}
+        <AnalyticsScripts />
+      </body>
     </html>
   );
 }

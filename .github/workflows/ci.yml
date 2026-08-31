@@ -70,8 +70,8 @@ jobs:
       - name: Build API
         run: pnpm --filter @milanos/api build
 
-      - name: Test default-off API route boundary
-        run: pnpm --filter @milanos/api exec vitest run src/app.ordering-disabled.test.ts
+      - name: Test complete API suite
+        run: pnpm --filter @milanos/api test
 
   build-web:
     name: Build Web
@@ -126,3 +126,130 @@ jobs:
 
       - name: Validate production redirect safety
         run: pnpm --filter @milanos/web validate:static
+
+  container-build-and-web-smoke:
+    name: Container Build and Web Smoke
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Build API production image
+        run: |
+          docker build \
+            --file apps/api/Dockerfile \
+            --target production \
+            --tag milanos-api-pr \
+            .
+
+      - name: Build web production image
+        run: |
+          docker build \
+            --file apps/web/Dockerfile \
+            --target production \
+            --build-arg SITE_ENV=production \
+            --build-arg ORDER_PROVIDER=skytab \
+            --build-arg ORDER_MODE=iframe \
+            --build-arg SKYTAB_ORDER_URL=https://online.skytab.com/29f9af1c8689260fadade27c64cb9e55 \
+            --build-arg SKYTAB_IFRAME_ENABLED=true \
+            --build-arg CUSTOM_ORDERING_ENABLED=false \
+            --build-arg CUSTOM_PAYMENT_ENABLED=false \
+            --build-arg ANALYTICS_ENABLED=false \
+            --tag milanos-web-pr \
+            .
+
+      - name: Start web container on loopback
+        run: |
+          docker run --detach \
+            --name milanos-web-smoke \
+            --publish 127.0.0.1:8080:80 \
+            milanos-web-pr
+
+      - name: Smoke test web container
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          base_url='http://127.0.0.1:8080'
+          export NO_PROXY='127.0.0.1'
+
+          for attempt in {1..20}; do
+            if curl --noproxy '*' --silent --show-error --fail \
+              --connect-timeout 2 --max-time 5 \
+              --output /dev/null "${base_url}/"; then
+              break
+            fi
+
+            if [ "$attempt" -eq 20 ]; then
+              docker logs milanos-web-smoke || true
+              exit 1
+            fi
+
+            sleep 1
+          done
+
+          assert_status() {
+            local expected="$1"
+            local path="$2"
+            local output="${3:-/dev/null}"
+            local actual
+
+            actual="$(
+              curl --noproxy '*' --silent --show-error \
+                --connect-timeout 2 --max-time 5 \
+                --output "$output" \
+                --write-out '%{http_code}' \
+                "${base_url}${path}"
+            )"
+
+            if [ "$actual" != "$expected" ]; then
+              echo "::error::${path} returned ${actual}; expected ${expected}"
+              return 1
+            fi
+          }
+
+          order_html="$(mktemp)"
+          redirect_headers="$(mktemp)"
+          trap 'rm -f "$order_html" "$redirect_headers"' EXIT
+
+          assert_status 200 /
+          assert_status 200 /order "$order_html"
+          assert_status 200 /menu/pizza
+          assert_status 410 /network
+
+          redirect_status="$(
+            curl --noproxy '*' --silent --show-error \
+              --connect-timeout 2 --max-time 5 \
+              --output /dev/null \
+              --dump-header "$redirect_headers" \
+              --write-out '%{http_code}' \
+              "${base_url}/menu/pizza/"
+          )"
+
+          if [ "$redirect_status" != '301' ]; then
+            echo "::error::Trailing-slash route returned ${redirect_status}; expected 301"
+            exit 1
+          fi
+
+          if ! grep -Eiq \
+            '^location: (https?://127\.0\.0\.1(:8080)?)?/menu/pizza\r?$' \
+            "$redirect_headers"; then
+            echo '::error::Trailing-slash redirect did not target /menu/pizza'
+            exit 1
+          fi
+
+          if ! grep -Fq '\"mode\":\"redirect\"' "$order_html"; then
+            echo '::error::Production-safe redirect mode was not serialized'
+            exit 1
+          fi
+
+          if grep -Fq '\"mode\":\"iframe\"' "$order_html" ||
+            grep -Fq '\"iframeEnabled\":true' "$order_html"; then
+            echo '::error::Production order HTML serialized active iframe configuration'
+            exit 1
+          fi
+
+      - name: Remove web smoke container
+        if: always()
+        run: docker rm --force milanos-web-smoke >/dev/null 2>&1 || true

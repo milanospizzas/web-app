@@ -143,6 +143,103 @@ jobs:
             --tag milanos-api-pr \
             .
 
+      - name: Inspect API production image
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          image='milanos-api-pr'
+
+          fail() {
+            echo "::error::$1" >&2
+            exit 1
+          }
+
+          configured_user="$(docker image inspect --format '{{.Config.User}}' "$image")"
+          [ "$configured_user" = 'node' ] ||
+            fail "API image Config.User must be node; got '${configured_user:-<empty>}'"
+
+          runtime_user="$(docker run --rm --network none --entrypoint id "$image" -un)"
+          runtime_uid="$(docker run --rm --network none --entrypoint id "$image" -u)"
+          [ "$runtime_user" = 'node' ] ||
+            fail "API image runtime user must be node; got '$runtime_user'"
+          [ "$runtime_uid" != '0' ] ||
+            fail 'API image runtime UID must be nonzero'
+
+          openssl_path="$(
+            docker run --rm --network none --entrypoint sh "$image" -c \
+              'openssl_path="$(command -v openssl)" && test -x "$openssl_path" && printf "%s\n" "$openssl_path"'
+          )"
+          openssl_version="$(
+            docker run --rm --network none --entrypoint openssl "$image" version
+          )"
+          case "$openssl_version" in
+            'OpenSSL 3.'*) ;;
+            *) fail "API image must provide OpenSSL 3.x; got '$openssl_version'" ;;
+          esac
+          printf 'API image user: %s (uid %s)\nOpenSSL: %s (%s)\n' \
+            "$runtime_user" "$runtime_uid" "$openssl_version" "$openssl_path"
+
+          docker run --rm --network none --entrypoint sh "$image" -c '
+            set -eu
+            for required_file in \
+              /app/apps/api/dist/index.js \
+              /app/apps/api/prisma/schema.prisma \
+              /app/apps/api/prisma/migrations/migration_lock.toml
+            do
+              test -f "$required_file" || {
+                echo "Missing API image file: $required_file" >&2
+                exit 1
+              }
+            done
+
+            migration_files="$(
+              find /app/apps/api/prisma/migrations -type f -name migration.sql -print
+            )"
+            test -n "$migration_files" || {
+              echo "API image contains no Prisma migration.sql files" >&2
+              exit 1
+            }
+            printf "API image entrypoint, schema, and migrations are present\n%s\n" \
+              "$migration_files"
+          '
+
+          prisma_version="$(
+            docker run --rm --network none \
+              --env CI=1 \
+              --env CHECKPOINT_DISABLE=1 \
+              --env PRISMA_HIDE_UPDATE_MESSAGE=true \
+              --workdir /app/apps/api \
+              --entrypoint sh \
+              "$image" \
+              -c './node_modules/.bin/prisma version 2>&1'
+          )"
+          printf '%s\n' "$prisma_version"
+
+          if printf '%s\n' "$prisma_version" |
+            grep -Eqi 'failed to detect.*(libssl|openssl)'; then
+            fail 'Prisma emitted an OpenSSL detection warning'
+          fi
+
+          computed_target="$(
+            printf '%s\n' "$prisma_version" |
+              sed -n 's/^Computed binaryTarget[[:space:]]*:[[:space:]]*//p'
+          )"
+          [ "$computed_target" = 'linux-musl-openssl-3.0.x' ] ||
+            fail "Unexpected Prisma binaryTarget '$computed_target'"
+
+          docker run --rm --network none \
+            --workdir /app/apps/api \
+            --entrypoint node \
+            "$image" \
+            -e '
+              const prisma = require("@prisma/client");
+              if (typeof prisma.PrismaClient !== "function") {
+                throw new Error("@prisma/client did not expose PrismaClient");
+              }
+              process.stdout.write("@prisma/client require passed\n");
+            '
+
       - name: Build web production image
         run: |
           docker build \

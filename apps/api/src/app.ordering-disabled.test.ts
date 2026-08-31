@@ -10,22 +10,22 @@ vi.mock('./modules/payments/shift4.service', () => ({
 }));
 
 const syntheticOrdersRoutes: FastifyPluginCallback = (app, _options, done) => {
-  app.post('/:orderId/payment', async () => ({ success: true }));
+  app.post('/:orderId/payment', () => ({ success: true }));
   done();
 };
 
 const syntheticPosRoutes: FastifyPluginCallback = (app, _options, done) => {
-  app.get('/synthetic-status', async () => ({ enabled: true }));
+  app.get('/synthetic-status', () => ({ enabled: true }));
   done();
 };
 
 const syntheticAuthRoutes: FastifyPluginCallback = (app, _options, done) => {
-  app.post('/magic-link', async () => ({ accepted: true }));
+  app.post('/magic-link', () => ({ accepted: true }));
   done();
 };
 
 const syntheticMenuRoutes: FastifyPluginCallback = (app, _options, done) => {
-  app.get('/', async () => ({ items: [] }));
+  app.get('/', () => ({ items: [] }));
   done();
 };
 
@@ -37,10 +37,10 @@ describe('custom ordering and payment registration gate', () => {
   });
 
   it('does not load or register custom order/payment routes while disabled', async () => {
-    const loadAuthRoutes = vi.fn(async () => ({ authRoutes: syntheticAuthRoutes }));
-    const loadMenuRoutes = vi.fn(async () => ({ menuRoutes: syntheticMenuRoutes }));
-    const loadOrdersRoutes = vi.fn(async () => ({ ordersRoutes: syntheticOrdersRoutes }));
-    const loadPosRoutes = vi.fn(async () => ({ posRoutes: syntheticPosRoutes }));
+    const loadAuthRoutes = vi.fn().mockResolvedValue({ authRoutes: syntheticAuthRoutes });
+    const loadMenuRoutes = vi.fn().mockResolvedValue({ menuRoutes: syntheticMenuRoutes });
+    const loadOrdersRoutes = vi.fn().mockResolvedValue({ ordersRoutes: syntheticOrdersRoutes });
+    const loadPosRoutes = vi.fn().mockResolvedValue({ posRoutes: syntheticPosRoutes });
     const app = await buildApp({
       customOrderingEnabled: false,
       customPaymentEnabled: false,
@@ -74,8 +74,8 @@ describe('custom ordering and payment registration gate', () => {
   });
 
   it('does not expose dormant account or database-backed menu routes by default', async () => {
-    const loadAuthRoutes = vi.fn(async () => ({ authRoutes: syntheticAuthRoutes }));
-    const loadMenuRoutes = vi.fn(async () => ({ menuRoutes: syntheticMenuRoutes }));
+    const loadAuthRoutes = vi.fn().mockResolvedValue({ authRoutes: syntheticAuthRoutes });
+    const loadMenuRoutes = vi.fn().mockResolvedValue({ menuRoutes: syntheticMenuRoutes });
     const app = await buildApp({
       customOrderingEnabled: false,
       customPaymentEnabled: false,
@@ -104,7 +104,7 @@ describe('custom ordering and payment registration gate', () => {
   });
 
   it('does not register dormant POS routes while custom ordering is disabled', async () => {
-    const loadPosRoutes = vi.fn(async () => ({ posRoutes: syntheticPosRoutes }));
+    const loadPosRoutes = vi.fn().mockResolvedValue({ posRoutes: syntheticPosRoutes });
     const app = await buildApp({
       customOrderingEnabled: false,
       customPaymentEnabled: false,
@@ -122,10 +122,10 @@ describe('custom ordering and payment registration gate', () => {
   });
 
   it('restores POS registration with custom ordering alone while payment stays disabled', async () => {
-    const loadAuthRoutes = vi.fn(async () => ({ authRoutes: syntheticAuthRoutes }));
-    const loadMenuRoutes = vi.fn(async () => ({ menuRoutes: syntheticMenuRoutes }));
-    const loadPosRoutes = vi.fn(async () => ({ posRoutes: syntheticPosRoutes }));
-    const loadOrdersRoutes = vi.fn(async () => ({ ordersRoutes: syntheticOrdersRoutes }));
+    const loadAuthRoutes = vi.fn().mockResolvedValue({ authRoutes: syntheticAuthRoutes });
+    const loadMenuRoutes = vi.fn().mockResolvedValue({ menuRoutes: syntheticMenuRoutes });
+    const loadPosRoutes = vi.fn().mockResolvedValue({ posRoutes: syntheticPosRoutes });
+    const loadOrdersRoutes = vi.fn().mockResolvedValue({ ordersRoutes: syntheticOrdersRoutes });
     const app = await buildApp({
       customOrderingEnabled: true,
       customPaymentEnabled: false,
@@ -162,9 +162,9 @@ describe('custom ordering and payment registration gate', () => {
   });
 
   it('registers account routes only when ordering and accounts are explicitly enabled', async () => {
-    const loadAuthRoutes = vi.fn(async () => ({ authRoutes: syntheticAuthRoutes }));
-    const loadMenuRoutes = vi.fn(async () => ({ menuRoutes: syntheticMenuRoutes }));
-    const loadPosRoutes = vi.fn(async () => ({ posRoutes: syntheticPosRoutes }));
+    const loadAuthRoutes = vi.fn().mockResolvedValue({ authRoutes: syntheticAuthRoutes });
+    const loadMenuRoutes = vi.fn().mockResolvedValue({ menuRoutes: syntheticMenuRoutes });
+    const loadPosRoutes = vi.fn().mockResolvedValue({ posRoutes: syntheticPosRoutes });
     const app = await buildApp({
       customOrderingEnabled: true,
       customPaymentEnabled: false,
@@ -185,7 +185,7 @@ describe('custom ordering and payment registration gate', () => {
   });
 
   it('fails closed when only one custom flag is enabled', async () => {
-    const loadOrdersRoutes = vi.fn(async () => ({ ordersRoutes: syntheticOrdersRoutes }));
+    const loadOrdersRoutes = vi.fn().mockResolvedValue({ ordersRoutes: syntheticOrdersRoutes });
     const app = await buildApp({
       customOrderingEnabled: true,
       customPaymentEnabled: false,
@@ -208,13 +208,13 @@ describe('custom ordering and payment registration gate', () => {
   it('restores registration only when both flags are explicitly enabled', async () => {
     const paymentRouteReached = vi.fn();
     const isolatedRoutes: FastifyPluginCallback = (app, _options, done) => {
-      app.post('/:orderId/payment', async () => {
+      app.post('/:orderId/payment', () => {
         paymentRouteReached();
         return { success: true };
       });
       done();
     };
-    const loadOrdersRoutes = vi.fn(async () => ({ ordersRoutes: isolatedRoutes }));
+    const loadOrdersRoutes = vi.fn().mockResolvedValue({ ordersRoutes: isolatedRoutes });
     const app = await buildApp({
       customOrderingEnabled: true,
       customPaymentEnabled: true,

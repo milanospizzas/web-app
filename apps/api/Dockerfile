@@ -2,11 +2,14 @@
 FROM node:20-alpine AS development
 
 WORKDIR /app
-RUN corepack enable && corepack prepare pnpm@9 --activate
+RUN apk add --no-cache openssl \
+    && corepack enable \
+    && corepack prepare pnpm@9.15.9 --activate
 
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 COPY apps/api/package.json ./apps/api/
 COPY packages/shared/package.json ./packages/shared/
+COPY apps/api/prisma/schema.prisma ./apps/api/prisma/schema.prisma
 RUN pnpm install --frozen-lockfile
 
 COPY . .

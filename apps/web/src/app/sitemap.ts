@@ -4,6 +4,10 @@ import { featureFlags, loyaltySignupReady, publicSpecials } from '@/content/feat
 import { absoluteUrl } from '@/content/site';
 
 export default function sitemap(): MetadataRoute.Sitemap {
+  if (process.env.SITE_ENV !== 'production') {
+    return [];
+  }
+
   const routes: Array<{
     path: string;
     priority: number;

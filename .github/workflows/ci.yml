@@ -307,32 +307,40 @@ jobs:
           }
 
           order_html="$(mktemp)"
-          redirect_headers="$(mktemp)"
-          trap 'rm -f "$order_html" "$redirect_headers"' EXIT
+          trap 'rm -f "$order_html"' EXIT
 
           assert_status 200 /
           assert_status 200 /order "$order_html"
           assert_status 200 /menu/pizza
           assert_status 410 /network
 
-          redirect_status="$(
+          redirect_result="$(
             curl --noproxy '*' --silent --show-error \
               --connect-timeout 2 --max-time 5 \
               --output /dev/null \
-              --dump-header "$redirect_headers" \
-              --write-out '%{http_code}' \
+              --write-out '%{http_code}\n%{redirect_url}\n' \
               "${base_url}/menu/pizza/"
           )"
+
+          redirect_status="$(
+            printf '%s\n' "$redirect_result" |
+              sed -n '1p'
+          )"
+
+          redirect_url="$(
+            printf '%s\n' "$redirect_result" |
+              sed -n '2p'
+          )"
+
+          expected_redirect="${base_url}/menu/pizza"
 
           if [ "$redirect_status" != '301' ]; then
             echo "::error::Trailing-slash route returned ${redirect_status}; expected 301"
             exit 1
           fi
 
-          if ! grep -Eiq \
-            '^location: (https?://127\.0\.0\.1(:8080)?)?/menu/pizza\r?$' \
-            "$redirect_headers"; then
-            echo '::error::Trailing-slash redirect did not target /menu/pizza'
+          if [ "$redirect_url" != "$expected_redirect" ]; then
+            echo "::error::Trailing-slash redirect resolved to '${redirect_url:-<empty>}'; expected '${expected_redirect}'"
             exit 1
           fi
 

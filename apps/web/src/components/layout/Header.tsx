@@ -1,99 +1,122 @@
 'use client';
 
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { useState } from 'react';
-import { Button } from '../ui/Button';
+import { site } from '@/content/site';
+import { BrandLogo } from '@/components/media/BrandLogo';
+import { TrackedOrderLink } from '@/components/analytics/TrackedOrderLink';
+import { TrackedActionLink } from '@/components/analytics/TrackedActionLink';
+
+const navigation = [
+  { href: '/menu', label: 'Menu' },
+  { href: '/about', label: 'Our Story' },
+  { href: '/catering', label: 'Catering' },
+  { href: '/reviews', label: 'Reviews' },
+  { href: '/contact', label: 'Visit Us' },
+];
 
 export function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const pathname = usePathname();
+  const isActive = (href: string) => pathname === href || pathname.startsWith(`${href}/`);
 
   return (
-    <header className="sticky top-0 z-40 w-full border-b border-neutral-200 bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/60">
-      <nav className="container flex h-16 items-center justify-between">
-        {/* Logo */}
-        <Link href="/" className="flex items-center space-x-2">
-          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary-700">
-            <span className="text-2xl font-bold text-white">M</span>
-          </div>
-          <span className="text-xl font-bold text-neutral-900">Milano's Pizza</span>
-        </Link>
-
-        {/* Desktop Navigation */}
-        <div className="hidden md:flex md:items-center md:space-x-6">
-          <Link href="/menu" className="text-sm font-medium text-neutral-700 hover:text-primary-700 transition-colors">
-            Menu
-          </Link>
-          <Link href="/about" className="text-sm font-medium text-neutral-700 hover:text-primary-700 transition-colors">
-            About
-          </Link>
-          <Link href="/catering" className="text-sm font-medium text-neutral-700 hover:text-primary-700 transition-colors">
-            Catering
-          </Link>
-          <Link href="/faq" className="text-sm font-medium text-neutral-700 hover:text-primary-700 transition-colors">
-            FAQ
-          </Link>
-          <Link href="/contact" className="text-sm font-medium text-neutral-700 hover:text-primary-700 transition-colors">
-            Contact
-          </Link>
-        </div>
-
-        {/* Actions */}
-        <div className="flex items-center space-x-4">
-          <Link href="/cart" className="relative p-2 text-neutral-700 hover:text-primary-700 transition-colors">
-            <svg className="w-6 h-6" fill="none" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" viewBox="0 0 24 24" stroke="currentColor">
-              <path d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
-            </svg>
-            <span className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-primary-700 text-xs font-bold text-white">
-              0
-            </span>
-          </Link>
-
-          <Link href="/account/login">
-            <Button variant="outline" size="sm">Sign In</Button>
-          </Link>
-
-          <Link href="/menu">
-            <Button size="sm">Order Now</Button>
-          </Link>
-
-          {/* Mobile menu button */}
-          <button
-            className="md:hidden p-2 text-neutral-700"
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+    <>
+      <a className="skip-link" href="#main-content">Skip to main content</a>
+      <div className="announcement-bar">
+        <div className="site-container announcement-inner">
+          <span>Serving Davie, Florida</span>
+          <TrackedActionLink
+            href={site.phoneHref}
+            eventName="phone_call_clicked"
+            location="announcement-bar"
+            ariaLabel={`Call Milano's Pizzas at ${site.phoneDisplay}`}
           >
-            <svg className="w-6 h-6" fill="none" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" viewBox="0 0 24 24" stroke="currentColor">
-              {mobileMenuOpen ? (
-                <path d="M6 18L18 6M6 6l12 12" />
-              ) : (
-                <path d="M4 6h16M4 12h16M4 18h16" />
-              )}
-            </svg>
-          </button>
+            Call {site.phoneDisplay}
+          </TrackedActionLink>
         </div>
-      </nav>
+      </div>
+      <header className="site-header">
+        <nav className="site-container nav-shell" aria-label="Primary navigation">
+          <Link
+            href="/"
+            className="brand-link"
+            aria-label="Milano's Pizzas home"
+            aria-current={pathname === '/' ? 'page' : undefined}
+          >
+            <BrandLogo className="brand-logo" loading="eager" />
+            <span className="brand-name">Milano's Pizzas</span>
+          </Link>
 
-      {/* Mobile Menu */}
-      {mobileMenuOpen && (
-        <div className="md:hidden border-t border-neutral-200 bg-white">
-          <div className="container py-4 space-y-4">
-            <Link href="/menu" className="block py-2 text-sm font-medium text-neutral-700">
-              Menu
-            </Link>
-            <Link href="/about" className="block py-2 text-sm font-medium text-neutral-700">
-              About
-            </Link>
-            <Link href="/catering" className="block py-2 text-sm font-medium text-neutral-700">
-              Catering
-            </Link>
-            <Link href="/faq" className="block py-2 text-sm font-medium text-neutral-700">
-              FAQ
-            </Link>
-            <Link href="/contact" className="block py-2 text-sm font-medium text-neutral-700">
-              Contact
-            </Link>
+          <div className="desktop-nav">
+            {navigation.map((item) => {
+              const active = isActive(item.href);
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className={active ? 'nav-link active' : 'nav-link'}
+                  aria-current={active ? 'page' : undefined}
+                >
+                  {item.label}
+                </Link>
+              );
+            })}
           </div>
-        </div>
-      )}
-    </header>
+
+          <div className="nav-actions">
+            <TrackedOrderLink className="button button-primary header-order" source="site-header">
+              Order Online
+            </TrackedOrderLink>
+            <button
+              type="button"
+              className="menu-toggle"
+              aria-expanded={mobileMenuOpen}
+              aria-controls="mobile-navigation"
+              aria-label={mobileMenuOpen ? 'Close navigation menu' : 'Open navigation menu'}
+              onClick={() => setMobileMenuOpen((open) => !open)}
+            >
+              <span />
+              <span />
+              <span />
+            </button>
+          </div>
+        </nav>
+
+        {mobileMenuOpen && (
+          <div id="mobile-navigation" className="mobile-nav">
+            <div className="site-container mobile-nav-inner">
+              {navigation.map((item) => {
+                const active = isActive(item.href);
+                return (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    className={active ? 'active' : undefined}
+                    aria-current={active ? 'page' : undefined}
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    {item.label}
+                  </Link>
+                );
+              })}
+              <TrackedOrderLink source="mobile-menu">Order Online</TrackedOrderLink>
+            </div>
+          </div>
+        )}
+        <noscript>
+          <style>{'.menu-toggle{display:none!important}'}</style>
+          <nav className="mobile-nav noscript-mobile-nav" aria-label="Primary navigation fallback">
+            <div className="site-container mobile-nav-inner">
+              {navigation.map((item) => (
+                <a key={item.href} href={item.href}>{item.label}</a>
+              ))}
+              <a href="/order?source=mobile-menu">Order Online</a>
+            </div>
+          </nav>
+        </noscript>
+      </header>
+    </>
   );
 }

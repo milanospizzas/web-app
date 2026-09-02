@@ -1,5 +1,7 @@
 # Milano's Pizza - Architecture Documentation
 
+> **Deferred architecture notice:** The custom ordering, payment, POS, account, and loyalty flows described in this historical document are not the active public-site architecture. The current website uses the permanent `/order` route to redirect to SkyTab, while `CUSTOM_ORDERING_ENABLED=false`, `CUSTOM_PAYMENT_ENABLED=false`, and `ACCOUNTS_ENABLED=false` keep custom server routes unregistered. See `public-site-launch-checklist.md` for the approved boundary.
+
 ## Overview
 
 Milano's Pizza is a full-stack restaurant ordering platform built with modern technologies and best practices.

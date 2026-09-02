@@ -1,103 +1,33 @@
-import Fastify from 'fastify';
-import fastifyCookie from '@fastify/cookie';
-import fastifyCors from '@fastify/cors';
-import fastifyHelmet from '@fastify/helmet';
-import fastifyRateLimit from '@fastify/rate-limit';
 import { config } from './config';
 import { logger } from './shared/utils/logger';
 import { connectDatabase, disconnectDatabase } from './shared/database/prisma';
-import { errorHandler } from './shared/middleware/error.middleware';
+import { buildApp } from './app';
 
-// Import routes
-import { authRoutes } from './modules/auth/auth.routes';
-import { menuRoutes } from './modules/menu/menu.routes';
-import { ordersRoutes } from './modules/orders/orders.routes';
-import { posRoutes } from './modules/pos/pos.routes';
-
-const fastify = Fastify({
-  logger: {
-    level: config.LOG_LEVEL,
-    transport:
-      config.NODE_ENV === 'development'
-        ? {
-            target: 'pino-pretty',
-            options: {
-              colorize: true,
-              translateTime: 'HH:MM:ss Z',
-              ignore: 'pid,hostname',
-            },
-          }
-        : undefined,
-  },
-  requestIdLogLabel: 'reqId',
-  disableRequestLogging: false,
-  trustProxy: true,
-});
+let fastify: Awaited<ReturnType<typeof buildApp>> | undefined;
 
 async function start() {
   try {
-    // Connect to database
     await connectDatabase();
+    fastify = await buildApp();
 
-    // Register plugins
-    await fastify.register(fastifyHelmet, {
-      contentSecurityPolicy: false,
-    });
-
-    await fastify.register(fastifyCors, {
-      origin: config.FRONTEND_URL,
-      credentials: true,
-    });
-
-    await fastify.register(fastifyCookie, {
-      secret: config.SESSION_SECRET,
-    });
-
-    await fastify.register(fastifyRateLimit, {
-      max: config.RATE_LIMIT_MAX,
-      timeWindow: config.RATE_LIMIT_WINDOW_MS,
-    });
-
-    // Error handler
-    fastify.setErrorHandler(errorHandler);
-
-    // Health check
-    fastify.get('/health', () => {
-      return {
-        status: 'ok',
-        timestamp: new Date().toISOString(),
-        version: '1.0.0',
-        services: {
-          database: 'connected',
-          redis: 'connected',
-        },
-      };
-    });
-
-    // API routes
-    await fastify.register(authRoutes, { prefix: '/api/auth' });
-    await fastify.register(menuRoutes, { prefix: '/api/menu' });
-    await fastify.register(ordersRoutes, { prefix: '/api/orders' });
-    await fastify.register(posRoutes, { prefix: '/api/pos' });
-
-    // Start server
     await fastify.listen({
       host: config.HOST,
       port: config.PORT,
     });
 
-    logger.info(`🚀 Server listening on http://${config.HOST}:${config.PORT}`);
-    logger.info(`📊 Environment: ${config.NODE_ENV}`);
+    logger.info(`Server listening on http://${config.HOST}:${config.PORT}`);
+    logger.info(`Environment: ${config.NODE_ENV}`);
   } catch (error) {
     logger.error(error);
     process.exit(1);
   }
 }
 
-// Graceful shutdown
 async function shutdown() {
   logger.info('Shutting down gracefully...');
-  await fastify.close();
+  if (fastify) {
+    await fastify.close();
+  }
   await disconnectDatabase();
   process.exit(0);
 }

@@ -38,6 +38,7 @@ services:
     build:
       context: .
       dockerfile: ./apps/api/Dockerfile
+      target: development
     container_name: milanos-api
     environment:
       NODE_ENV: development
@@ -46,14 +47,9 @@ services:
       REDIS_URL: redis://redis:6379
       FRONTEND_URL: http://localhost:3000
       SESSION_SECRET: dev-secret-change-in-production
-      SHIFT4_API_KEY: ${SHIFT4_API_KEY}
-      SHIFT4_API_SECRET: ${SHIFT4_API_SECRET}
-      SHIFT4_ENVIRONMENT: sandbox
-      AWS_REGION: ${AWS_REGION}
-      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
-      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
-      SES_FROM_EMAIL: ${SES_FROM_EMAIL}
-      SES_FROM_NAME: Milano's Pizza
+      CUSTOM_ORDERING_ENABLED: 'false'
+      CUSTOM_PAYMENT_ENABLED: 'false'
+      ACCOUNTS_ENABLED: 'false'
       TAX_RATE: 0.0825
     ports:
       - '3001:3001'
@@ -63,32 +59,45 @@ services:
       redis:
         condition: service_healthy
     volumes:
-      - ./apps/api:/app
+      - .:/app
       - /app/node_modules
-      - /app/dist
-    command: npm run dev
+      - /app/apps/api/node_modules
+      - /app/packages/shared/node_modules
+      - /app/apps/api/dist
+      - /app/packages/shared/dist
+    working_dir: /app
+    command: pnpm --filter @milanos/api dev
 
   # Web (Next.js)
   web:
     build:
       context: .
       dockerfile: ./apps/web/Dockerfile
+      target: development
     container_name: milanos-web
     environment:
       NODE_ENV: development
-      NEXT_PUBLIC_API_URL: http://localhost:3001
-      NEXT_PUBLIC_SHIFT4_I4GO_URL: https://i4go-sandbox.shift4.com/checkout
-      NEXT_PUBLIC_SITE_NAME: Milano's Pizza
+      SITE_ENV: staging
       NEXT_PUBLIC_SITE_URL: http://localhost:3000
+      ORDER_PROVIDER: skytab
+      ORDER_MODE: redirect
+      SKYTAB_ORDER_URL: https://online.skytab.com/29f9af1c8689260fadade27c64cb9e55
+      SKYTAB_IFRAME_ENABLED: 'false'
+      CUSTOM_ORDERING_ENABLED: 'false'
+      CUSTOM_PAYMENT_ENABLED: 'false'
+      ANALYTICS_ENABLED: 'false'
     ports:
       - '3000:3000'
     depends_on:
       - api
+    working_dir: /app
     volumes:
-      - ./apps/web:/app
+      - .:/app
       - /app/node_modules
-      - /app/.next
-    command: npm run dev
+      - /app/apps/web/node_modules
+      - /app/packages/shared/node_modules
+      - /app/apps/web/.next
+    command: pnpm --filter @milanos/web dev
 
 volumes:
   postgres_data:

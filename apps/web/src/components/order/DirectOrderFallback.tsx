@@ -1,32 +1,21 @@
 'use client';
 
-import type { MouseEvent, PointerEvent } from 'react';
 import type { OrderProvider } from '@/lib/order/config';
-import { normalizeAnalyticsValue, trackEvent } from '@/lib/analytics/events';
-import { checkoutDestinationWithTracking } from '@/lib/order/tracking';
+import { trackEvent } from '@/lib/analytics/events';
 
 export function DirectOrderFallback({
-  checkoutUrl,
+  destination,
   provider,
+  source,
 }: {
-  checkoutUrl: string;
+  destination: string;
   provider: OrderProvider;
+  source: string;
 }) {
-  function destinationWithTracking() {
-    const current = new URL(window.location.href);
-    return checkoutDestinationWithTracking(checkoutUrl, current.searchParams);
-  }
-
-  function prepareFallback(event: PointerEvent<HTMLAnchorElement>) {
-    event.currentTarget.href = destinationWithTracking();
-  }
-
-  function preserveTracking(event: MouseEvent<HTMLAnchorElement>) {
-    const current = new URL(window.location.href);
-    event.currentTarget.href = destinationWithTracking();
+  function trackRedirect() {
     if (provider === 'skytab') {
       trackEvent('skytab_redirect_clicked', {
-        source: normalizeAnalyticsValue(current.searchParams.get('source')),
+        source,
         provider,
       });
     }
@@ -35,14 +24,8 @@ export function DirectOrderFallback({
   return (
     <p className="order-fallback">
       Having trouble?{' '}
-      <a
-        className="text-link"
-        href={checkoutUrl}
-        onPointerDown={prepareFallback}
-        onClick={preserveTracking}
-        aria-label="Open Milano's online ordering storefront directly"
-      >
-        Open online ordering directly
+      <a className="text-link" href={destination} onClick={trackRedirect}>
+        Open SkyTab ordering directly
       </a>
       .
     </p>

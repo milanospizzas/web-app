@@ -23,15 +23,10 @@ export function safeCampaignValue(value: string | null) {
 
 export function checkoutDestinationWithTracking(
   checkoutUrl: string,
-  searchParams: Pick<URLSearchParams, 'get'>,
+  searchParams: Pick<URLSearchParams, 'get'>
 ) {
   const destination = new URL(checkoutUrl);
   destination.searchParams.set('source', normalizeAnalyticsValue(searchParams.get('source')));
-
-  for (const key of CAMPAIGN_KEYS) {
-    const value = safeCampaignValue(searchParams.get(key));
-    if (value) destination.searchParams.set(key, value);
-  }
 
   return destination.toString();
 }

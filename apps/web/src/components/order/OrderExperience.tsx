@@ -1,20 +1,23 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
-import { useSearchParams } from 'next/navigation';
 import type { PublicOrderConfig } from '@/lib/order/config';
 import { normalizeAnalyticsValue, trackEvent } from '@/lib/analytics/events';
 import { checkoutDestinationWithTracking } from '@/lib/order/tracking';
 import { site } from '@/content/site';
+import { DirectOrderFallback } from '@/components/order/DirectOrderFallback';
 
 export function OrderExperience({ config }: { config: PublicOrderConfig }) {
-  const searchParams = useSearchParams();
   const [isMobile, setIsMobile] = useState(true);
-  const [isLeaving, setIsLeaving] = useState(false);
   const [showFrame, setShowFrame] = useState(false);
   const [frameFailed, setFrameFailed] = useState(false);
   const [frameLoaded, setFrameLoaded] = useState(false);
-  const source = normalizeAnalyticsValue(searchParams.get('source'));
+  const [source, setSource] = useState(() => normalizeAnalyticsValue(null));
+
+  useEffect(() => {
+    const current = new URL(window.location.href);
+    setSource(normalizeAnalyticsValue(current.searchParams.get('source')));
+  }, []);
 
   useEffect(() => {
     const media = window.matchMedia('(max-width: 767px), (pointer: coarse)');
@@ -26,43 +29,42 @@ export function OrderExperience({ config }: { config: PublicOrderConfig }) {
 
   const destination = useMemo(() => {
     if (!config.checkoutUrl) return null;
-    return checkoutDestinationWithTracking(config.checkoutUrl, searchParams);
-  }, [config.checkoutUrl, searchParams]);
+    return checkoutDestinationWithTracking(config.checkoutUrl, {
+      get: (key) => (key === 'source' ? source : null),
+    });
+  }, [config.checkoutUrl, source]);
 
   const canUseFrame = Boolean(
-    destination && config.mode === 'iframe' && config.iframeEnabled && !isMobile,
+    destination && config.mode === 'iframe' && config.iframeEnabled && !isMobile
   );
 
   useEffect(() => {
-    if (!showFrame || frameLoaded) return;
+    if (!showFrame || frameLoaded || frameFailed) return;
     const timeout = window.setTimeout(() => setFrameFailed(true), 8000);
     return () => window.clearTimeout(timeout);
-  }, [frameLoaded, showFrame]);
+  }, [frameFailed, frameLoaded, showFrame]);
 
-  function beginOrder() {
-    if (!destination) return;
-
-    if (canUseFrame) {
-      if (config.provider === 'skytab') {
-        trackEvent('skytab_iframe_attempted', { source, provider: config.provider });
-      }
-      setFrameFailed(false);
-      setFrameLoaded(false);
-      setShowFrame(true);
-      return;
+  function revealFrame() {
+    if (config.provider === 'skytab') {
+      trackEvent('skytab_iframe_attempted', { source, provider: config.provider });
     }
+    setFrameFailed(false);
+    setFrameLoaded(false);
+    setShowFrame(true);
+  }
 
+  function trackRedirect() {
     if (config.provider === 'skytab') {
       trackEvent('skytab_redirect_clicked', { source, provider: config.provider });
     }
-    setIsLeaving(true);
-    window.setTimeout(() => window.location.assign(destination), 200);
   }
 
   if (!destination) {
     return (
       <div className="order-dynamic" role="alert">
-        <p className="order-error"><strong>Online ordering is temporarily unavailable.</strong></p>
+        <p className="order-error">
+          <strong>Online ordering is temporarily unavailable.</strong>
+        </p>
         <p>
           Please call us at{' '}
           <a className="text-link" href={site.phoneHref}>
@@ -76,13 +78,17 @@ export function OrderExperience({ config }: { config: PublicOrderConfig }) {
 
   return (
     <div className="order-dynamic">
-      {showFrame && !frameFailed ? (
-        <div className="order-frame-shell" aria-live="polite">
-          {!frameLoaded && <p className="order-status">Loading online ordering…</p>}
+      {canUseFrame && showFrame && !frameFailed ? (
+        <div className="order-frame-shell">
+          {!frameLoaded && (
+            <p className="order-status" role="status">
+              Loading SkyTab ordering…
+            </p>
+          )}
           <iframe
             className="order-frame"
             src={destination}
-            title="Milano's Pizzas online ordering storefront"
+            title="SkyTab online ordering storefront"
             onLoad={() => {
               setFrameLoaded(true);
               setFrameFailed(false);
@@ -90,23 +96,27 @@ export function OrderExperience({ config }: { config: PublicOrderConfig }) {
             onError={() => setFrameFailed(true)}
           />
         </div>
-      ) : (
-        <button
-          className="button button-primary button-large"
-          type="button"
-          onClick={beginOrder}
-          disabled={isLeaving}
-          aria-label="Continue to Milano's secure online ordering storefront"
-        >
-          {isLeaving ? 'Opening secure ordering…' : 'Continue to Order'}
+      ) : canUseFrame ? (
+        <button className="button button-primary button-large" type="button" onClick={revealFrame}>
+          View SkyTab ordering here
         </button>
+      ) : (
+        <a
+          className="button button-primary button-large"
+          href={destination}
+          onClick={trackRedirect}
+        >
+          Continue to SkyTab
+        </a>
       )}
 
       {frameFailed && (
         <p className="order-error" role="alert">
-          The embedded ordering storefront did not load. Use the direct ordering link below.
+          The embedded SkyTab ordering storefront did not load. Use the direct link below.
         </p>
       )}
+
+      <DirectOrderFallback destination={destination} provider={config.provider} source={source} />
     </div>
   );
 }

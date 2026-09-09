@@ -351,7 +351,7 @@ button, input, textarea, select { font: inherit; }
 
 @media (max-width: 759px) {
   html { scroll-padding-bottom: 90px; }
-  body:has(main :focus-visible) .mobile-sticky-order { display: none; }
+  body:has(main :focus-visible) .mobile-sticky-order-nav { display: none; }
   .hero-grid { padding-block: 3rem; gap: 2.5rem; }
   .home-category-card { min-height: 88px; }
   .site-footer { padding-bottom: calc(6.5rem + env(safe-area-inset-bottom)); }
@@ -381,7 +381,7 @@ button, input, textarea, select { font: inherit; }
   .home-catering-inner { grid-template-columns: 1fr auto; }
   .home-catering-inner .button { justify-self: end; }
   .home-location-grid { grid-template-columns: .85fr 1.15fr; }
-  .mobile-sticky-order { display: none; }
+  .mobile-sticky-order-nav { display: none; }
   .header-order { display: inline-flex !important; }
 }
 

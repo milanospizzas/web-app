@@ -30,8 +30,10 @@ export function MobileStickyOrder({ menuOpen }: { menuOpen: boolean }) {
   if (!visible || menuOpen) return null;
 
   return (
-    <TrackedOrderLink className="mobile-sticky-order" source="sticky-mobile">
-      Order Online
-    </TrackedOrderLink>
+    <nav className="mobile-sticky-order-nav" aria-label="Quick ordering">
+      <TrackedOrderLink className="mobile-sticky-order" source="sticky-mobile">
+        Order Online
+      </TrackedOrderLink>
+    </nav>
   );
 }

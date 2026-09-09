@@ -18,7 +18,7 @@ export default function MenuPage() {
       <PageHero
         eyebrow="Pizza and Italian-American favorites"
         title="Explore the Milano's Pizzas Menu"
-        intro="Browse our first-party menu categories without unverified pricing, then continue to online ordering for current selections and availability."
+        intro="Explore our menu categories, then continue to online ordering for the latest selection and availability."
         breadcrumbs={[{ label: 'Home', href: '/' }, { label: 'Menu', href: '/menu' }]}
         actions={
           <TrackedOrderLink className="button button-cream button-large" source="menu-landing">
@@ -34,10 +34,6 @@ export default function MenuPage() {
               <p className="eyebrow">Find your next favorite</p>
               <h2>Menu categories</h2>
             </div>
-            <p>
-              Prices remain intentionally unpublished until they are verified against the current
-              POS menu.
-            </p>
           </div>
           <div className="menu-directory-grid">
             {menuPages.map((page, index) => (
@@ -45,14 +41,16 @@ export default function MenuPage() {
                 <span className="menu-card-number" aria-hidden="true">
                   {String(index + 1).padStart(2, '0')}
                 </span>
-                <h2>{page.label}</h2>
-                <p>{page.intro}</p>
+                <h3>{page.label}</h3>
+                <p>{page.slug === 'lunch-specials'
+                  ? 'Explore our lunch menu in online ordering for the latest selection and availability.'
+                  : page.intro}</p>
                 <span className="menu-card-link">Explore category <span aria-hidden="true">→</span></span>
               </Link>
             ))}
             <Link className="menu-directory-card catering-card" href="/catering">
               <span className="menu-card-number" aria-hidden="true">{String(menuPages.length + 1).padStart(2, '0')}</span>
-              <h2>Catering</h2>
+              <h3>Catering</h3>
               <p>Explore general catering categories and request a quote directly from Milano's.</p>
               <span className="menu-card-link">Explore catering <span aria-hidden="true">→</span></span>
             </Link>

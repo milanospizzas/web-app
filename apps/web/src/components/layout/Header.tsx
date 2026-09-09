@@ -7,12 +7,12 @@ import { site } from '@/content/site';
 import { BrandLogo } from '@/components/media/BrandLogo';
 import { TrackedOrderLink } from '@/components/analytics/TrackedOrderLink';
 import { TrackedActionLink } from '@/components/analytics/TrackedActionLink';
+import { MobileStickyOrder } from '@/components/layout/MobileStickyOrder';
 
 const navigation = [
   { href: '/menu', label: 'Menu' },
   { href: '/about', label: 'Our Story' },
   { href: '/catering', label: 'Catering' },
-  { href: '/reviews', label: 'Reviews' },
   { href: '/contact', label: 'Visit Us' },
 ];
 
@@ -86,7 +86,9 @@ export function Header() {
 
         {mobileMenuOpen && (
           <div id="mobile-navigation" className="mobile-nav">
-            <div className="site-container mobile-nav-inner">
+            <div className="site-container mobile-nav-inner" onClick={(event) => {
+              if ((event.target as HTMLElement).closest('a')) setMobileMenuOpen(false);
+            }}>
               {navigation.map((item) => {
                 const active = isActive(item.href);
                 return (
@@ -117,6 +119,7 @@ export function Header() {
           </nav>
         </noscript>
       </header>
+      {pathname === '/' && <MobileStickyOrder menuOpen={mobileMenuOpen} />}
     </>
   );
 }

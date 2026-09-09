@@ -3,7 +3,7 @@ import { site } from '@/content/site';
 import { BrandLogo } from '@/components/media/BrandLogo';
 import { TrackedOrderLink } from '@/components/analytics/TrackedOrderLink';
 import { TrackedActionLink } from '@/components/analytics/TrackedActionLink';
-import { featureFlags } from '@/content/features';
+import { featureFlags, loyaltySignupReady, publicSpecials } from '@/content/features';
 
 export function Footer() {
   return (
@@ -24,9 +24,9 @@ export function Footer() {
             <li><Link href="/menu">Menu</Link></li>
             <li><Link href="/about">Our Story</Link></li>
             <li><Link href="/catering">Catering</Link></li>
-            <li><Link href="/reviews">Reviews</Link></li>
-            <li><Link href="/specials">Specials</Link></li>
-            <li><Link href="/loyalty">Loyalty</Link></li>
+            {featureFlags.googleReviewUrl && <li><Link href="/reviews">Reviews</Link></li>}
+            {publicSpecials.length > 0 && <li><Link href="/specials">Specials</Link></li>}
+            {loyaltySignupReady && <li><Link href="/loyalty">Loyalty</Link></li>}
             <li><Link href="/contact">Contact</Link></li>
           </ul>
         </div>

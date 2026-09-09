@@ -243,9 +243,45 @@ for (const path of htmlFiles) {
   }
 }
 
+const homepageHtml = readFileSync(join(outputDirectory, 'index.html'), 'utf8');
+const implementationCopy = /first-party|unverified pric(?:ing|es)|current POS menu|permanent internal \/order|configured ordering provider|category route|stays out of search results|neutral placeholders|publication state|search-result exclusion|production build|staging build|live ordering workflow|prices are published|await verification/i;
+for (const path of htmlFiles) {
+  const page = relative(outputDirectory, path).replaceAll('\\', '/');
+  const html = readFileSync(path, 'utf8');
+  const text = visibleText(html);
+  if ((page === 'index.html' || page === 'menu.html' || page.startsWith('menu/')) && implementationCopy.test(text)) {
+    errors.push(`${page}: customer copy contains implementation-facing language`);
+  }
+  if (page.startsWith('menu/') && /Order this item/i.test(text)) {
+    errors.push(`${page}: ordering actions must use generic wording`);
+  }
+  const header = html.match(/<header\b[\s\S]*?<\/header>/i)?.[0] ?? '';
+  const footer = html.match(/<footer\b[\s\S]*?<\/footer>/i)?.[0] ?? '';
+  // These disabled destinations are part of both supported audit build profiles.
+  if (!process.env.GOOGLE_REVIEW_URL && /href="\/reviews(?:[?"#])/i.test(header + footer)) {
+    errors.push(`${page}: disabled Reviews must be absent from navigation`);
+  }
+  if (/href="\/(?:specials|loyalty)(?:[?"#])/i.test(footer)) {
+    errors.push(`${page}: unready Specials/Loyalty must be absent from footer navigation`);
+  }
+}
+if (/dish-photo-placeholder/i.test(homepageHtml)) {
+  errors.push('index.html: faux dish-image placeholder must not appear');
+}
+if (/Popular Milano(?:'|’|&#x27;|&#39;)s Favorites/i.test(homepageHtml)) {
+  errors.push('index.html: unsupported popularity heading must not appear');
+}
+if (/href="\/menu\/pasta(?:[?"#])/i.test(homepageHtml)) {
+  errors.push('index.html: empty Pasta category must not be promoted');
+}
+if (!process.env.GOOGLE_REVIEW_URL && /Guest feedback|review source is verified|Review excerpts, names, ratings/i.test(visibleText(homepageHtml))) {
+  errors.push('index.html: disabled review section must be omitted');
+}
+
 if (errors.length) {
   console.error(errors.join('\n'));
   process.exit(1);
 }
 
 console.log(`Validated ${htmlFiles.length} static HTML pages.`);
+console.log(`Indexing: ${indexablePageCount} indexable, ${noIndexPageCount} noindex, ${sitemapLocationCount} sitemap locations. Customer-facing visual-refinement checks passed.`);

@@ -44,7 +44,9 @@ export default function MenuCategoryPage({ params }: MenuCategoryPageProps) {
       <PageHero
         eyebrow="Milano's menu"
         title={page.h1}
-        intro={page.intro}
+        intro={page.slug === 'lunch-specials'
+          ? 'Explore our lunch menu in online ordering for the latest selection and availability.'
+          : page.intro}
         breadcrumbs={[
           { label: 'Home', href: '/' },
           { label: 'Menu', href: '/menu' },
@@ -59,12 +61,11 @@ export default function MenuCategoryPage({ params }: MenuCategoryPageProps) {
 
       <section className="content-section category-content">
         <div className="site-container narrow-container">
-          <p className="eyebrow">Browse this category</p>
-          <h2>{page.categories.join(' & ')}</h2>
+          <h2>{categoryItems.length > 0 ? 'From our menu' : 'Explore online ordering'}</h2>
           <p className="large-copy">
-            This first-party page introduces the {page.label.toLowerCase()} category without
-            publishing unverified prices. Use online ordering to see the current item selection,
-            options, and availability.
+            {categoryItems.length > 0
+              ? 'Browse a few dishes from this category. Continue to online ordering for the latest selection and availability.'
+              : "We’re updating this section of our website. View our current menu in online ordering."}
           </p>
 
           {categoryItems.length > 0 && (
@@ -87,31 +88,13 @@ export default function MenuCategoryPage({ params }: MenuCategoryPageProps) {
                     <h3>{item.name}</h3>
                     <p>{item.shortDescription}</p>
                     <TrackedOrderLink source={`featured-${item.slug}`} menuItem>
-                      Order this item <span aria-hidden="true">→</span>
+                      Order Online <span aria-hidden="true">→</span>
                     </TrackedOrderLink>
                   </div>
                 </article>
               ))}
             </div>
           )}
-
-          {categoryItems.length === 0 && (
-            <div className="price-note">
-              <strong>Verified item details are coming later.</strong>
-              <p>
-                This category route remains available for visitors, but it stays out of search
-                results until Milano's has approved first-party item content for publication.
-              </p>
-            </div>
-          )}
-
-          <div className="price-note">
-            <strong>About website pricing</strong>
-            <p>
-              No prices are published on this website until they have been checked against the
-              current POS menu. Online ordering is the source for current selections.
-            </p>
-          </div>
         </div>
       </section>
 

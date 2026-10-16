@@ -1,0 +1,19 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "milanos-pizza-web-staging",
+  "account_id": "556e4f18ab74cb5e0328909efb248bb7",
+  "main": "apps/web/cloudflare/worker.mjs",
+  "compatibility_date": "2026-10-15",
+  "workers_dev": true,
+  "preview_urls": true,
+  "build": {
+    "command": "node apps/web/scripts/build-cloudflare.mjs",
+  },
+  "assets": {
+    "directory": "./apps/web/out",
+    "binding": "ASSETS",
+    "html_handling": "drop-trailing-slash",
+    "not_found_handling": "404-page",
+    "run_worker_first": ["/network", "/network/"],
+  },
+}

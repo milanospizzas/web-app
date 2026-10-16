@@ -1,0 +1,55 @@
+name: Cloudflare API Check
+
+on:
+  pull_request:
+    paths:
+      - 'apps/api/cloudflare/**'
+      - 'package.json'
+      - 'pnpm-lock.yaml'
+      - 'wrangler.api.jsonc'
+      - '.github/workflows/cloudflare-api-check.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  dormant-api-preview:
+    name: Cloudflare dormant API contract
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      WRANGLER_SEND_METRICS: 'false'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - uses: pnpm/action-setup@v4
+        with:
+          version: '9.15.9'
+      - run: pnpm install --frozen-lockfile
+      - run: npm run test:cloudflare:api
+      - run: npm run check:cloudflare:api
+      - name: Exercise the local API without credentials or deployment
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm run preview:cloudflare:api > "$RUNNER_TEMP/milanos-cloudflare-api-preview.log" 2>&1 &
+          preview_pid=$!
+          trap 'kill "$preview_pid" 2>/dev/null || true' EXIT
+          for attempt in {1..60}; do
+            if curl --silent --fail --connect-timeout 2 --max-time 3 http://127.0.0.1:8788/health >/dev/null; then
+              node apps/api/cloudflare/smoke.mjs http://127.0.0.1:8788
+              exit 0
+            fi
+            if ! kill -0 "$preview_pid" 2>/dev/null; then
+              cat "$RUNNER_TEMP/milanos-cloudflare-api-preview.log"
+              exit 1
+            fi
+            sleep 2
+          done
+          cat "$RUNNER_TEMP/milanos-cloudflare-api-preview.log"
+          exit 1

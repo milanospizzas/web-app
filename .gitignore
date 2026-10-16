@@ -60,6 +60,7 @@ prisma/migrations/**/*.sql
 .turbo/
 .wrangler/
 cloudflare-env.d.ts
+cloudflare-api-env.d.ts
 
 # Docker
 docker-compose.override.yml

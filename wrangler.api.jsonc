@@ -1,0 +1,18 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "milanos-pizza-api-staging",
+  "account_id": "556e4f18ab74cb5e0328909efb248bb7",
+  "main": "apps/api/cloudflare/worker.mjs",
+  "compatibility_date": "2026-10-16",
+  "workers_dev": true,
+  "preview_urls": true,
+  // This API represents the current disabled custom-ordering mode. It must
+  // never be given legacy database, payment, email, or POS credentials.
+  "env": {
+    "production": {
+      "name": "milanos-pizza-api",
+      "workers_dev": true,
+      "preview_urls": false,
+    },
+  },
+}

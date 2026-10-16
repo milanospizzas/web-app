@@ -2,7 +2,7 @@
 
 This deployment runs the existing Next.js static export on Cloudflare Workers Static Assets at a `workers.dev` hostname. It is a staging preview, not a public launch or a WordPress replacement.
 
-The Cloudflare account is the owner-selected `Bautistajose95@gmail.com's Account`; the Worker name is `milanos-pizza-web-staging`. `wrangler.jsonc` is the source of truth. It contains no custom domains, zone routes, database bindings, API proxy, backend secrets, or paid-service bindings. Amplify remains available. Sevalla, WordPress, DNS, existing branches/worktrees, and other services are unchanged.
+The Cloudflare account is the owner-selected `Bautistajose95@gmail.com's Account`; the Worker name is `milanos-pizza-web-staging`. `wrangler.jsonc` is the source of truth. It contains no custom domains, zone routes, database bindings, API proxy, backend secrets, or paid-service bindings. Amplify remains available. WordPress, DNS, existing branches/worktrees, and other services are unchanged. The later owner-authorized [Cloudflare API replacement and Sevalla retirement](cloudflare-api-migration.md) is tracked separately; its retirement checks are pending, and this static preview does not depend on the API.
 
 ## Build and deploy
 
@@ -46,12 +46,12 @@ The automated smoke uses only local or `workers.dev` origins. It checks route av
 
 The existing announcement-bar landmark issue and other deferred accessibility/launch requirements remain open. This migration does not approve production SEO, legal/forms, menu publication, custom payments, Shift4 certification, or public cutover.
 
-Normal static-asset requests are free within Cloudflare's platform limits. The small Worker uses the account's Workers request allowance for its routed requests. No paid plan is required by this configuration. Keeping Amplify and all Sevalla services means those existing charges remain until a separate retirement decision.
+Normal static-asset requests are free within Cloudflare's platform limits. The small Worker uses the account's Workers request allowance for its routed requests. No paid plan is required by this configuration. Amplify charges continue while it remains active; Sevalla charges continue until its separately tracked retirement checks and service removal are completed.
 
 ## Rollback and future automation
 
 The preview is additive: no current customer traffic or existing deployment is redirected to it. Retain the prior Cloudflare version ID before later updates; use Cloudflare version rollback only for this Worker if separately authorized. Do not reset main or alter the WordPress/DNS setup.
 
-Deployment is intentionally explicit for this first migration. No main-branch push, merge, GitHub deployment secret, automatic provider build connection, or existing workflow change is required to publish the preview. A later CI connection can reuse the same staging build and smoke commands after its access and trigger scope are approved.
+Deployment is intentionally explicit for this first migration. No main-branch push, merge, GitHub deployment secret, or automatic provider build connection is required to publish the preview. The later API migration removes only the obsolete placeholder Sevalla job from the manual deployment workflow; the Amplify job is unchanged. A later CI connection can reuse the same staging build and smoke commands after its access and trigger scope are approved.
 
 References: [Static assets](https://developers.cloudflare.com/workers/static-assets/), [routing](https://developers.cloudflare.com/workers/static-assets/routing/worker-script/), [headers](https://developers.cloudflare.com/workers/static-assets/headers/), [billing](https://developers.cloudflare.com/workers/static-assets/billing-and-limitations/).

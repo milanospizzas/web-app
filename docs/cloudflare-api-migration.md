@@ -1,25 +1,25 @@
 # Cloudflare API migration and Sevalla retirement
 
-Status as of October 16, 2026: both Cloudflare API Workers are deployed, and staging passes the deployed smoke checks. PostgreSQL backup restoration has passed. Production smoke checks, Redis backup restoration, and Sevalla retirement are pending. This document does not record a completed deletion or cutover.
+Completed October 16, 2026: both Cloudflare API Workers are verified, and all six Sevalla services have been deleted after successful PostgreSQL/Redis backup restoration and all six CI jobs at `9bad1ca`. Post-deletion API and frontend smoke checks passed. WordPress, Amplify, DNS, and repository worktrees remain unchanged.
 
 The owner authorized replacing the Milano API services on Sevalla and retiring the six listed services after verified backups and replacement checks. The live WordPress site, AWS Amplify, and DNS remain unchanged. The static frontend continues to use its existing [Cloudflare staging preview](cloudflare-static-staging.md).
 
-## What is being replaced
+## What was replaced
 
-The current public site reads its menu and content from the static export and hands ordering to SkyTab. It has no callers of the repository's dormant API client. The production API defaults its custom ordering, payment, and account flags to false; those flags were absent from the inspected deployment. Its intended public surface is `/health` with custom endpoints unavailable.
+The repository's public frontend reads its menu and content from the static export and hands ordering to SkyTab. It has no callers of the repository's dormant API client. The production API defaults its custom ordering, payment, and account flags to false; those flags were absent from the inspected deployment. Its intended public surface is `/health` with custom endpoints unavailable.
 
-The older Sevalla development deployment registers legacy routes unconditionally, but its inspected database contains no application tables. Those unfinished routes are not promoted into the replacement. This migration preserves the current public site's behavior and keeps the future ordering platform disabled.
+The older Sevalla development deployment registered legacy routes unconditionally, but its inspected database contained no application tables. Those unfinished routes were not promoted into the replacement. This migration preserves the current public site's behavior and keeps the future ordering platform disabled.
 
-| Existing Sevalla service   | Role                               | Retirement status |
+| Former Sevalla service     | Role                               | Retirement status |
 | -------------------------- | ---------------------------------- | ----------------- |
-| `milanos-pizza-api-prod`   | Production API application         | Pending           |
-| `milanos-pizza-api-dev`    | Legacy development API application | Pending           |
-| `milanos-pizza-prod`       | Production PostgreSQL database     | Pending           |
-| `milanos-pizza-dev`        | Development PostgreSQL database    | Pending           |
-| `milanos-pizza-redis-prod` | Production Redis database          | Pending           |
-| `milanos-pizza-redis-dev`  | Development Redis database         | Pending           |
+| `milanos-pizza-api-prod`   | Production API application         | Deleted           |
+| `milanos-pizza-api-dev`    | Legacy development API application | Deleted           |
+| `milanos-pizza-prod`       | Production PostgreSQL database     | Deleted           |
+| `milanos-pizza-dev`        | Development PostgreSQL database    | Deleted           |
+| `milanos-pizza-redis-prod` | Production Redis database          | Deleted           |
+| `milanos-pizza-redis-dev`  | Development Redis database         | Deleted           |
 
-Neither API application has a custom domain. There is no DNS cutover in this migration. Provider-owned Sevalla URLs cannot be transferred to Cloudflare; any discovered consumer of an old URL must be updated and verified before the corresponding service is retired.
+Neither API application had a custom domain, and no active API caller was found that needed updating. No DNS cutover was needed. Provider-owned Sevalla URLs cannot be transferred to Cloudflare and are no longer supported after retirement; future integrations must use the Cloudflare destinations below.
 
 ## Cloudflare replacement contract
 
@@ -79,22 +79,24 @@ The explicit `--env=` selects the top-level staging configuration; `--env produc
 
 Initial read-only inspection found no application objects in either actual PostgreSQL application database or its `postgres` maintenance database. Both Redis 8.2.2 instances reported an empty keyspace. Absence of application data does not substitute for backup verification.
 
-Full encrypted PostgreSQL application-database dumps have been restored into isolated PostgreSQL 17 instances, and their application-object catalogs match the inspected empty source catalogs. Redis RDB backup and isolated restoration are pending at this document revision. Backup files, credentials, detailed inventory, and restore evidence stay in the owner's private backup location; they must not be added to Git, CI artifacts, public logs, or this runbook.
+Full encrypted PostgreSQL application-database dumps have been restored into isolated PostgreSQL 17 instances, and their application-object catalogs match the inspected empty source catalogs. Both Redis RDB backups have been restored under Redis 8.2.2, matching the empty source keyspaces, zero stored functions, and built-in `vectorset` version 1 module. Encrypted-transfer SHA-256 verification, successful decryption, and restored RDB SHA-256 verification passed. Backup files, credentials, detailed inventory, and restore evidence stay in the owner's private backup location; they must not be added to Git, CI artifacts, public logs, or this runbook.
 
-Before retiring any listed service, complete and record:
+The following retirement checks have passed:
 
-- PostgreSQL and Redis backup integrity checks and successful isolated restores, including matching source/restore inventories.
-- An exact service inventory showing the resources belong to this application, with no WordPress dependency or unaccounted consumer.
-- Successful deployed smoke checks for both Cloudflare API Workers and recorded source commit/version IDs.
-- A fresh static frontend navigation check showing SkyTab ordering links and no requests to the retiring APIs.
-- Any required caller updates, plus a final check that no custom domain or DNS record needs changing.
-- Recovery instructions and private access to the preserved configuration and backups.
+- [x] PostgreSQL and Redis backup integrity checks and successful isolated restores, including matching source/restore inventories.
+- [x] Exact application/service inventory, with no WordPress dependency or other active consumer found. Inspected Sevalla static-site, object-storage, and load-balancer inventories were empty.
+- [x] Both Cloudflare API Workers passed 31 deployed read-only smoke requests each. Source verification is recorded at `9bad1ca`; deployed version IDs are below.
+- [x] The static frontend passed 25 HTTP checks and fresh browser home/order navigation checks, retaining SkyTab links and making no requests to the retiring APIs.
+- [x] No API caller updates, custom-domain changes, or DNS changes were needed. Read-only verification found the live WordPress site unchanged.
+- [x] Recovery instructions and private access to the preserved configuration and backups are available.
 
-Retire only the six named Milano services after those checks pass. Retire the application processes before their database dependencies. Do not delete the Sevalla account, unrelated resources, repository branches/worktrees, WordPress, Amplify, or DNS records. Confirm service removal and the resulting provider inventory, then update the table and completion record below with verified results. Existing charges continue while resources remain active; provider billing may include usage accrued before retirement.
+All six named services were deleted after those checks passed. Final Sevalla Applications, Databases, and Home views showed empty onboarding states; there were no static sites, object storage, or load balancers. The account, repository branches/worktrees, WordPress, Amplify, and DNS were not changed.
+
+After deletion, both Cloudflare APIs again passed 31 read-only smoke checks each, the frontend passed 25 HTTP checks, and WordPress home/about returned HTTP 200 with unchanged content. The usage dashboard still displayed $14.36 accrued usage and a $31.74 projection, limited to application/database compute. Those historical and lagging billing figures do not establish the final invoice; accrued charges remain payable despite the empty service inventory.
 
 ## Rollback
 
-Before Sevalla retirement, rollback can retain the existing Sevalla services while the Cloudflare candidate is corrected. The static site and live WordPress site require no change because they do not call these Workers.
+Sevalla retirement is complete, so the deleted services cannot simply be resumed. Cloudflare version rollback remains available for later Worker updates; recovering Sevalla requires the private-backup restoration procedure below. The static site and live WordPress site require no change because they do not call these Workers.
 
 For an update to an existing Cloudflare API Worker, restore its previously recorded version with the explicit matching configuration/environment, then rerun the API smoke checks:
 
@@ -117,17 +119,20 @@ This migration grants no approval to activate customer accounts, custom checkout
 
 ## Completion record
 
-| Check                                    | Recorded state                                   |
-| ---------------------------------------- | ------------------------------------------------ |
-| Worker unit tests and type checks        | Passed locally                                   |
-| Local Cloudflare API smoke               | Passed: 31 read-only requests                    |
-| PostgreSQL backup restore                | Passed in isolated PostgreSQL 17                 |
-| Redis backup restore                     | Pending                                          |
-| Staging Cloudflare deployment/version    | Deployed: `7e1692dd-cfe3-4295-8edd-2d145c09133a` |
-| Production Cloudflare deployment/version | Deployed: `7bbd38d8-c3d6-482b-bb03-354a19576235` |
-| Staging API deployed smoke               | Passed: 31 read-only requests                    |
-| Production API and frontend checks       | Pending                                          |
-| Six-service retirement                   | Pending                                          |
-| Final Sevalla inventory/billing review   | Pending                                          |
+| Check                                    | Recorded state                                                         |
+| ---------------------------------------- | ---------------------------------------------------------------------- |
+| Worker unit tests and type checks        | Passed locally                                                         |
+| Local Cloudflare API smoke               | Passed: 31 read-only requests                                          |
+| PostgreSQL backup restore                | Passed in isolated PostgreSQL 17                                       |
+| Redis backup restore                     | Passed: both Redis 8.2.2 RDB restores and integrity checks             |
+| Staging Cloudflare deployment/version    | Deployed: `7e1692dd-cfe3-4295-8edd-2d145c09133a`                       |
+| Production Cloudflare deployment/version | Deployed: `7bbd38d8-c3d6-482b-bb03-354a19576235`                       |
+| Staging API deployed smoke               | Passed after deletion: 31 read-only requests                           |
+| Production API deployed smoke            | Passed after deletion: 31 read-only requests                           |
+| Frontend verification                    | Passed: browser home/order navigation and 25 post-deletion HTTP checks |
+| Repository CI                            | Passed: all six jobs at `9bad1ca`                                      |
+| WordPress verification                   | Home/about HTTP 200 and unchanged after deletion                       |
+| Six-service retirement                   | Complete: all six deleted October 16, 2026                             |
+| Final Sevalla inventory/billing review   | Passed: empty service inventory; accrued charges remain                |
 
 References: [Workers fetch handler](https://developers.cloudflare.com/workers/runtime-apis/handlers/fetch/), [Worker rollback](https://developers.cloudflare.com/workers/versions-and-deployments/rollbacks/), [D1 import compatibility](https://developers.cloudflare.com/d1/best-practices/import-export-data/), [Hyperdrive](https://developers.cloudflare.com/hyperdrive/get-started/).

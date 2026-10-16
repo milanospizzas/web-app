@@ -14,6 +14,12 @@
     "build": "npm run build --workspaces --if-present",
     "build:web": "npm run build --workspace=apps/web",
     "build:api": "npm run build --workspace=apps/api",
+    "build:cloudflare": "node apps/web/scripts/build-cloudflare.mjs",
+    "preview:cloudflare": "wrangler dev --local --ip 127.0.0.1 --port 8787",
+    "deploy:cloudflare": "wrangler deploy --strict --keep-vars",
+    "check:cloudflare": "wrangler types cloudflare-env.d.ts && tsc --noEmit --allowJs --checkJs --module esnext --target es2022 --moduleResolution bundler --lib es2022 --types ./cloudflare-env.d.ts --skipLibCheck apps/web/cloudflare/worker.mjs",
+    "smoke:cloudflare": "node apps/web/scripts/smoke-cloudflare.mjs",
+    "test:cloudflare": "node --test apps/web/scripts/prepare-cloudflare.test.mjs",
     "test": "npm run test --workspaces --if-present",
     "test:watch": "npm run test:watch --workspaces --if-present",
     "test:coverage": "npm run test:coverage --workspaces --if-present",
@@ -40,7 +46,8 @@
     "eslint": "^8.56.0",
     "eslint-config-prettier": "^9.1.0",
     "prettier": "^3.2.4",
-    "typescript": "^5.3.3"
+    "typescript": "^5.3.3",
+    "wrangler": "4.151.0"
   },
   "engines": {
     "node": ">=20.0.0",

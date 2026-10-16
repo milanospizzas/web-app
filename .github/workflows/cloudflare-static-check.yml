@@ -1,0 +1,52 @@
+name: Cloudflare Static Check
+
+on:
+  pull_request:
+    paths:
+      - 'apps/web/**'
+      - 'packages/shared/**'
+      - 'package.json'
+      - 'pnpm-lock.yaml'
+      - 'wrangler.jsonc'
+      - '.github/workflows/cloudflare-static-check.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  static-preview:
+    name: Cloudflare staging build and routing
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      WRANGLER_SEND_METRICS: 'false'
+      NEXT_TELEMETRY_DISABLED: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - uses: pnpm/action-setup@v4
+        with:
+          version: '9.15.9'
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm test:cloudflare
+      # The Wrangler type generation invokes the forced staging build hook.
+      - run: pnpm check:cloudflare
+      - name: Exercise local Cloudflare routing without credentials or deployment
+        shell: bash
+        run: |
+          set -euo pipefail
+          pnpm preview:cloudflare > "$RUNNER_TEMP/milanos-cloudflare-preview.log" 2>&1 &
+          preview_pid=$!
+          trap 'kill "$preview_pid" 2>/dev/null || true' EXIT
+          for attempt in {1..90}; do
+            if curl --silent --fail http://127.0.0.1:8787/robots.txt >/dev/null; then
+              pnpm smoke:cloudflare http://127.0.0.1:8787
+              exit 0
+            fi
+            sleep 2
+          done
+          cat "$RUNNER_TEMP/milanos-cloudflare-preview.log"
+          exit 1

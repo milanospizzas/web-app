@@ -1,4 +1,5 @@
 import { menuItems } from '@/content/menu';
+import Image from 'next/image';
 import { TrackedOrderLink } from '@/components/analytics/TrackedOrderLink';
 
 export function FeaturedFavorites() {
@@ -19,13 +20,16 @@ export function FeaturedFavorites() {
           {visibleItems.map((item) => (
             <article className="featured-favorite-card" key={item.slug}>
               {item.image && (
-                <img
-                  src={item.image.src}
-                  alt={item.image.alt}
-                  width={item.image.width}
-                  height={item.image.height}
-                  loading="lazy"
-                />
+                <figure>
+                  <Image
+                    src={item.image.src}
+                    alt={item.image.alt}
+                    width={item.image.width}
+                    height={item.image.height}
+                    sizes="(min-width: 980px) 280px, (min-width: 760px) 560px, calc(100vw - 2rem)"
+                  />
+                  {item.image.generated && <figcaption>AI-generated illustration.</figcaption>}
+                </figure>
               )}
               <div>
                 <h3>{item.name}</h3>

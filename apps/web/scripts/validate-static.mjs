@@ -1,4 +1,4 @@
-import { readFileSync, readdirSync, statSync } from 'node:fs';
+import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
 import { join, relative, resolve } from 'node:path';
 
 const outputDirectory = resolve(process.cwd(), 'out');
@@ -201,13 +201,15 @@ if (isStagingOutput) {
     errors.push('Staging robots.txt must not advertise a sitemap');
   }
 } else {
-  if (noIndexPageCount !== 16 || indexablePageCount !== 11) {
+  // Fifteen menu routes now contain the supplied take-out menu. Beverages,
+  // specials, reviews, loyalty, and the two draft legal pages remain excluded.
+  if (noIndexPageCount !== 6 || indexablePageCount !== 21) {
     errors.push(
-      `Production output must have 16 noindex pages and 11 indexable pages; found ${noIndexPageCount} and ${indexablePageCount}`
+      `Production output must have 6 noindex pages and 21 indexable pages; found ${noIndexPageCount} and ${indexablePageCount}`
     );
   }
-  if (sitemapLocationCount !== 11) {
-    errors.push(`Production sitemap must have 11 locations, found ${sitemapLocationCount}`);
+  if (sitemapLocationCount !== 21) {
+    errors.push(`Production sitemap must have 21 locations, found ${sitemapLocationCount}`);
   }
   if (!/^Allow:\s*\/\s*$/m.test(robots)) {
     errors.push('Production robots.txt must allow the public site');
@@ -220,7 +222,7 @@ if (isStagingOutput) {
   }
 }
 
-for (const excluded of ['/privacy', '/terms', '/network']) {
+for (const excluded of ['/privacy', '/terms', '/network', '/menu/beverages', '/specials', '/reviews', '/loyalty']) {
   if (sitemap.includes(`<loc>https://www.milanospizzas.com${excluded}</loc>`)) {
     errors.push(`sitemap.xml: draft/removed route ${excluded} must be excluded`);
   }
@@ -271,11 +273,52 @@ if (/dish-photo-placeholder/i.test(homepageHtml)) {
 if (/Popular Milano(?:'|’|&#x27;|&#39;)s Favorites/i.test(homepageHtml)) {
   errors.push('index.html: unsupported popularity heading must not appear');
 }
-if (/href="\/menu\/pasta(?:[?"#])/i.test(homepageHtml)) {
-  errors.push('index.html: empty Pasta category must not be promoted');
+for (const [, slug] of homepageHtml.matchAll(/href="\/menu\/([a-z0-9-]+)(?:[?"#])/g)) {
+  const categoryPath = join(outputDirectory, 'menu', `${slug}.html`);
+  if (!existsSync(categoryPath) || !/<article\b[^>]*class="[^"]*\bmenu-item\b/.test(readFileSync(categoryPath, 'utf8'))) {
+    errors.push(`index.html: promoted menu category ${slug} must contain published items`);
+  }
 }
 if (!process.env.GOOGLE_REVIEW_URL && /Guest feedback|review source is verified|Review excerpts, names, ratings/i.test(visibleText(homepageHtml))) {
   errors.push('index.html: disabled review section must be omitted');
+}
+
+const menuHtml = readFileSync(join(outputDirectory, 'menu.html'), 'utf8');
+const menuPdfUrl = '/menus/Milanos_Takeout_Menu.pdf';
+const menuPdfPath = join(outputDirectory, menuPdfUrl.slice(1));
+if (!menuHtml.includes(`href="${menuPdfUrl}"`) || !existsSync(menuPdfPath)) {
+  errors.push('menu.html: the downloadable take-out menu PDF must exist and be linked');
+} else if (readFileSync(menuPdfPath).subarray(0, 5).toString() !== '%PDF-') {
+  errors.push('menu.html: the take-out menu download is not a PDF');
+}
+
+const menuArticles = [...menuHtml.matchAll(/<article\b([^>]*)>([\s\S]*?)<\/article>/g)]
+  .map(([, attributes, contents]) => ({ id: attributeValue(attributes, 'id'), contents }))
+  .filter((article) => article.id);
+const itemIds = menuArticles.map((article) => article.id);
+if (new Set(itemIds).size !== itemIds.length) {
+  errors.push('menu.html: menu item anchors must be unique');
+}
+const garlicRolls = menuArticles.find((article) => article.id === 'garlic-rolls')?.contents ?? '';
+for (const price of ['$0.60', '$3.50', '$6.00']) {
+  if (!visibleText(garlicRolls).includes(price)) {
+    errors.push(`menu.html: Garlic Rolls must retain the printed ${price} portion price`);
+  }
+}
+const garlicImage = [...garlicRolls.matchAll(/<img\b([^>]*)>/g)]
+  .map(([, attributes]) => attributes)
+  .find((attributes) => attributeValue(attributes, 'src') === '/images/menu/garlic-rolls.webp');
+if (!garlicImage || !existsSync(join(outputDirectory, 'images/menu/garlic-rolls.webp'))) {
+  errors.push('menu.html: Garlic Rolls must load its published food image');
+} else if (
+  !(Number(attributeValue(garlicImage, 'width')) > 0) ||
+  !(Number(attributeValue(garlicImage, 'height')) > 0) ||
+  attributeValue(garlicImage, 'loading') !== 'lazy'
+) {
+  errors.push('menu.html: the Garlic Rolls image needs dimensions and lazy loading');
+}
+if (!/AI-generated illustration\. Presentation may vary\./.test(visibleText(garlicRolls))) {
+  errors.push('menu.html: the generated food image needs a visible illustration disclosure');
 }
 
 if (errors.length) {

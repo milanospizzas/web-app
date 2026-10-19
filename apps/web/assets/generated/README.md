@@ -21,10 +21,14 @@ All pizzas must have a thin New York-style crust. Place every topping under the 
 
 The owner confirmed that the Mixed Vegetables side contains carrots, broccoli, zucchini, cauliflower florets and yellow squash. Show all five vegetables. This confirmation replaces the earlier representative broccoli/carrot/zucchini assumption.
 
+The owner confirmed tomato sauce for all three adult ravioli fillings: cheese, short rib and wild mushroom. Use tomato sauce for each of these images; it is an owner-confirmed preparation, not an assumed sauce choice.
+
 Save each final PNG as `Milanos_[MenuItemName].png` with the menu item name in PascalCase, keeping separately named variants when requested. Preserve accepted masters except for owner-authorized corrections, including the new logo and ceramic stamp treatment. Generate an optimized WebP for the website without changing composition or colors. Record each actual output resolution; never describe a smaller image as native 8K.
 
 ## Generation progress
 
 The catalog has 170 menu rows, while the original image brief has 128 numbered entries. The generation plan expands distinct requested presentations and maps shared dishes to the appropriate menu slugs; size choices may share an image. A plan entry is not proof of a completed or published image. Generation and review remain in progress. Use each entry's recorded status and published image map to track delivery, and review earlier candidates against the latest stamp and pizza requirements before treating them as final.
 
-The October 18 staging checkpoint contains 51 completed photographs out of 149 planned, covering 76 catalog rows through Eggplant Rollatini with Pasta. All 51 optimized images were confirmed in the deployed menu HTML and matched their local SHA-256 hashes. This checkpoint does not mark the remaining 98 planned images complete.
+Seven additional customization images are supplemental individual assets: Baked Cheese Ravioli, Baked Short Rib Ravioli, Baked Wild Mushroom Ravioli, Salad with Shrimp, Salad with Broccoli, Pasta with Broccoli, and Ricotta & Cheese Red Pizza. Their plan entries intentionally have empty `menuSlugs` arrays. They are extra imagery for existing menu options, not new purchasable menu rows, and do not appear in the website's menu image map. Deliver their PNG masters and optimized WebP files as supplemental assets when completed; no additional galleries or menu rows are required.
+
+The current staging checkpoint contains 100 completed photographs out of 149 planned, covering 126 catalog rows through Milano's Combo Sub. All 100 optimized images were confirmed in the deployed menu HTML and matched their local SHA-256 hashes. Generation remains in progress, with 49 planned images still to complete, including the seven supplemental variants described above.

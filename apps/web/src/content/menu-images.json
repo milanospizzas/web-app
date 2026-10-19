@@ -530,5 +530,355 @@
     "width": 1536,
     "height": 1024,
     "generated": true
+  },
+  "cheese-ravioli": {
+    "src": "/images/menu/cheese-ravioli.webp",
+    "alt": "cheese ravioli on Milano's branded white tableware",
+    "width": 1536,
+    "height": 1024,
+    "generated": true
+  },
+  "short-rib-ravioli": {
+    "src": "/images/menu/short-rib-ravioli.webp",
+    "alt": "short rib ravioli on Milano's branded white tableware",
+    "width": 1536,
+    "height": 1024,
+    "generated": true
+  },
+  "wild-mushroom-ravioli": {
+    "src": "/images/menu/wild-mushroom-ravioli.webp",
+    "alt": "wild mushroom ravioli on Milano's branded white tableware",
+    "width": 1536,
+    "height": 1024,
+    "generated": true
+  },
+  "kids-pasta-meatball": {
+    "src": "/images/menu/kids-pasta-meatball.webp",
+    "alt": "kids pasta meatball on Milano's branded white tableware",
+    "width": 1536,
+    "height": 1024,
+    "generated": true
+  },
+  "kids-baked-ziti": {
+    "src": "/images/menu/kids-baked-ziti.webp",
+    "alt": "kids baked ziti on Milano's branded white tableware",
+    "width": 1536,
+    "height": 1024,
+    "generated": true
+  },
+  "kids-baked-ziti-ricotta": {
+    "src": "/images/menu/kids-baked-ziti-ricotta.webp",
+    "alt": "kids baked ziti ricotta on Milano's branded white tableware",
+    "width": 1536,
+    "height": 1024,
+    "generated": true
+  },
+  "kids-pizza": {
+    "src": "/images/menu/kids-pizza.webp",
+    "alt": "kids pizza on Milano's branded white tableware",
+    "width": 1536,
+    "height": 1024,
+    "generated": true
+  },
+  "kids-meat-ravioli": {
+    "src": "/images/menu/kids-meat-ravioli.webp",
+    "alt": "kids meat ravioli on Milano's branded white tableware",
+    "width": 1536,
+    "height": 1024,
+    "generated": true
+  },
+  "kids-cheese-ravioli": {
+    "src": "/images/menu/kids-cheese-ravioli.webp",
+    "alt": "kids cheese ravioli on Milano's branded white tableware",
+    "width": 1536,
+    "height": 1024,
+    "generated": true
+  },
+  "kids-pasta-butter": {
+    "src": "/images/menu/kids-pasta-butter.webp",
+    "alt": "kids pasta butter on Milano's branded white tableware",
+    "width": 1536,
+    "height": 1024,
+    "generated": true
+  },
+  "kids-pasta-tomato-sauce": {
+    "src": "/images/menu/kids-pasta-tomato-sauce.webp",
+    "alt": "kids pasta tomato sauce on Milano's branded white tableware",
+    "width": 1536,
+    "height": 1024,
+    "generated": true
+  },
+  "kids-pasta-alfredo": {
+    "src": "/images/menu/kids-pasta-alfredo.webp",
+    "alt": "kids pasta alfredo on Milano's branded white tableware",
+    "width": 1536,
+    "height": 1024,
+    "generated": true
+  },
+  "kids-pasta-pink-sauce": {
+    "src": "/images/menu/kids-pasta-pink-sauce.webp",
+    "alt": "kids pasta pink sauce on Milano's branded white tableware",
+    "width": 1536,
+    "height": 1024,
+    "generated": true
+  },
+  "cheese-pizza": {
+    "src": "/images/menu/cheese-pizza.webp",
+    "alt": "cheese pizza on Milano's branded white tableware",
+    "width": 1536,
+    "height": 1024,
+    "generated": true
+  },
+  "ricotta-cheese-pizza": {
+    "src": "/images/menu/ricotta-cheese-pizza.webp",
+    "alt": "ricotta cheese pizza on Milano's branded white tableware",
+    "width": 1536,
+    "height": 1024,
+    "generated": true
+  },
+  "milanos-sauce-pizza": {
+    "src": "/images/menu/milanos-sauce-pizza.webp",
+    "alt": "milanos sauce pizza on Milano's branded white tableware",
+    "width": 1536,
+    "height": 1024,
+    "generated": true
+  },
+  "pepperoni-pizza": {
+    "src": "/images/menu/pepperoni-pizza.webp",
+    "alt": "pepperoni pizza on Milano's branded white tableware",
+    "width": 1536,
+    "height": 1024,
+    "generated": true
+  },
+  "sausage-pizza": {
+    "src": "/images/menu/sausage-pizza.webp",
+    "alt": "sausage pizza on Milano's branded white tableware",
+    "width": 1536,
+    "height": 1024,
+    "generated": true
+  },
+  "meatball-pizza": {
+    "src": "/images/menu/meatball-pizza.webp",
+    "alt": "meatball pizza on Milano's branded white tableware",
+    "width": 1536,
+    "height": 1024,
+    "generated": true
+  },
+  "ham-pizza": {
+    "src": "/images/menu/ham-pizza.webp",
+    "alt": "ham pizza on Milano's branded white tableware",
+    "width": 1536,
+    "height": 1024,
+    "generated": true
+  },
+  "bacon-pizza": {
+    "src": "/images/menu/bacon-pizza.webp",
+    "alt": "bacon pizza on Milano's branded white tableware",
+    "width": 1536,
+    "height": 1024,
+    "generated": true
+  },
+  "mushroom-pizza": {
+    "src": "/images/menu/mushroom-pizza.webp",
+    "alt": "mushroom pizza on Milano's branded white tableware",
+    "width": 1536,
+    "height": 1024,
+    "generated": true
+  },
+  "onion-pizza": {
+    "src": "/images/menu/onion-pizza.webp",
+    "alt": "onion pizza on Milano's branded white tableware",
+    "width": 1536,
+    "height": 1024,
+    "generated": true
+  },
+  "black-olive-pizza": {
+    "src": "/images/menu/black-olive-pizza.webp",
+    "alt": "black olive pizza on Milano's branded white tableware",
+    "width": 1536,
+    "height": 1024,
+    "generated": true
+  },
+  "green-pepper-pizza": {
+    "src": "/images/menu/green-pepper-pizza.webp",
+    "alt": "green pepper pizza on Milano's branded white tableware",
+    "width": 1536,
+    "height": 1024,
+    "generated": true
+  },
+  "fresh-basil-pizza": {
+    "src": "/images/menu/fresh-basil-pizza.webp",
+    "alt": "fresh basil pizza on Milano's branded white tableware",
+    "width": 1536,
+    "height": 1024,
+    "generated": true
+  },
+  "fresh-garlic-pizza": {
+    "src": "/images/menu/fresh-garlic-pizza.webp",
+    "alt": "fresh garlic pizza on Milano's branded white tableware",
+    "width": 1536,
+    "height": 1024,
+    "generated": true
+  },
+  "fresh-tomato-pizza": {
+    "src": "/images/menu/fresh-tomato-pizza.webp",
+    "alt": "fresh tomato pizza on Milano's branded white tableware",
+    "width": 1536,
+    "height": 1024,
+    "generated": true
+  },
+  "anchovy-pizza": {
+    "src": "/images/menu/anchovy-pizza.webp",
+    "alt": "anchovy pizza on Milano's branded white tableware",
+    "width": 1536,
+    "height": 1024,
+    "generated": true
+  },
+  "chicken-pizza": {
+    "src": "/images/menu/chicken-pizza.webp",
+    "alt": "chicken pizza on Milano's branded white tableware",
+    "width": 1536,
+    "height": 1024,
+    "generated": true
+  },
+  "cauliflower-crust-pizza": {
+    "src": "/images/menu/cauliflower-crust-pizza.webp",
+    "alt": "cauliflower crust pizza on Milano's branded white tableware",
+    "width": 1536,
+    "height": 1024,
+    "generated": true
+  },
+  "margherita-pizza": {
+    "src": "/images/menu/margherita-pizza.webp",
+    "alt": "margherita pizza on Milano's branded white tableware",
+    "width": 1536,
+    "height": 1024,
+    "generated": true
+  },
+  "vegetarian-special-pizza": {
+    "src": "/images/menu/vegetarian-special-pizza.webp",
+    "alt": "vegetarian special pizza on Milano's branded white tableware",
+    "width": 1536,
+    "height": 1024,
+    "generated": true
+  },
+  "milanos-special-pizza": {
+    "src": "/images/menu/milanos-special-pizza.webp",
+    "alt": "milanos special pizza on Milano's branded white tableware",
+    "width": 1536,
+    "height": 1024,
+    "generated": true
+  },
+  "hawaiian-pizza": {
+    "src": "/images/menu/hawaiian-pizza.webp",
+    "alt": "hawaiian pizza on Milano's branded white tableware",
+    "width": 1536,
+    "height": 1024,
+    "generated": true
+  },
+  "white-heat-pizza": {
+    "src": "/images/menu/white-heat-pizza.webp",
+    "alt": "white heat pizza on Milano's branded white tableware",
+    "width": 1536,
+    "height": 1024,
+    "generated": true
+  },
+  "meat-lovers-pizza": {
+    "src": "/images/menu/meat-lovers-pizza.webp",
+    "alt": "meat lovers pizza on Milano's branded white tableware",
+    "width": 1536,
+    "height": 1024,
+    "generated": true
+  },
+  "meatball-sub": {
+    "src": "/images/menu/meatball-sub.webp",
+    "alt": "meatball sub on Milano's branded white tableware",
+    "width": 1536,
+    "height": 1024,
+    "generated": true
+  },
+  "meatball-parm-sub": {
+    "src": "/images/menu/meatball-parm-sub.webp",
+    "alt": "meatball parm sub on Milano's branded white tableware",
+    "width": 1536,
+    "height": 1024,
+    "generated": true
+  },
+  "lunch-meatball-parm-sub": {
+    "src": "/images/menu/meatball-parm-sub.webp",
+    "alt": "meatball parm sub on Milano's branded white tableware",
+    "width": 1536,
+    "height": 1024,
+    "generated": true
+  },
+  "sloppy-sausage-parm-sub": {
+    "src": "/images/menu/sloppy-sausage-parm-sub.webp",
+    "alt": "sloppy sausage parm sub on Milano's branded white tableware",
+    "width": 1536,
+    "height": 1024,
+    "generated": true
+  },
+  "sausage-tomato-sauce-sub": {
+    "src": "/images/menu/sausage-tomato-sauce-sub.webp",
+    "alt": "sausage tomato sauce sub on Milano's branded white tableware",
+    "width": 1536,
+    "height": 1024,
+    "generated": true
+  },
+  "italian-sausage-parm-sub": {
+    "src": "/images/menu/italian-sausage-parm-sub.webp",
+    "alt": "italian sausage parm sub on Milano's branded white tableware",
+    "width": 1536,
+    "height": 1024,
+    "generated": true
+  },
+  "hot-pressed-ham-cheese-sub": {
+    "src": "/images/menu/hot-pressed-ham-cheese-sub.webp",
+    "alt": "hot pressed ham cheese sub on Milano's branded white tableware",
+    "width": 1536,
+    "height": 1024,
+    "generated": true
+  },
+  "eggplant-parm-sub": {
+    "src": "/images/menu/eggplant-parm-sub.webp",
+    "alt": "eggplant parm sub on Milano's branded white tableware",
+    "width": 1536,
+    "height": 1024,
+    "generated": true
+  },
+  "chicken-parm-sub": {
+    "src": "/images/menu/chicken-parm-sub.webp",
+    "alt": "chicken parm sub on Milano's branded white tableware",
+    "width": 1536,
+    "height": 1024,
+    "generated": true
+  },
+  "chicken-cutlet-sub": {
+    "src": "/images/menu/chicken-cutlet-sub.webp",
+    "alt": "chicken cutlet sub on Milano's branded white tableware",
+    "width": 1536,
+    "height": 1024,
+    "generated": true
+  },
+  "ham-cheese-sub": {
+    "src": "/images/menu/ham-cheese-sub.webp",
+    "alt": "ham cheese sub on Milano's branded white tableware",
+    "width": 1536,
+    "height": 1024,
+    "generated": true
+  },
+  "salami-cheese-sub": {
+    "src": "/images/menu/salami-cheese-sub.webp",
+    "alt": "salami cheese sub on Milano's branded white tableware",
+    "width": 1536,
+    "height": 1024,
+    "generated": true
+  },
+  "milanos-combo-sub": {
+    "src": "/images/menu/milanos-combo-sub.webp",
+    "alt": "milanos combo sub on Milano's branded white tableware",
+    "width": 1536,
+    "height": 1024,
+    "generated": true
   }
 }

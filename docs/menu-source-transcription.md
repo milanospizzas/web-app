@@ -39,4 +39,8 @@ The owner additionally specified a realistic ceramic printed stamp for the plate
 
 The owner also confirmed the Mixed Vegetables side's ingredients: carrots, broccoli, zucchini, cauliflower florets and yellow squash. The catalog's short description now records that confirmation, while retaining the printed $4.00 price. This owner-confirmed mix replaces the earlier representative three-vegetable assumption used for image planning.
 
+The owner confirmed tomato sauce for all three adult ravioli fillings: cheese, short rib and wild mushroom. This owner-provided preparation detail supersedes the earlier generic sauce assumption used for image planning; it is separate from the PDF transcription.
+
 `apps/web/assets/generated/menu-photo-plan.json` tracks the expanded photography subjects, statuses and mappings to catalog rows; `apps/web/src/content/menu-images.json` lists published image references. Identical food across dinner, side, lunch or catering entries may share an image, and size choices may share a representative presentation. Generation remains in progress; the plan is not a claim that all requested images are finished. Check each delivered image against the latest logo, stamp and pizza requirements before accepting it as final.
+
+The current staging checkpoint has 100 completed images out of 149 planned, covering 126 of the 170 catalog rows. The remaining 49 planned images include seven supplemental customization variants that do not create additional menu rows.

@@ -2,22 +2,23 @@ import { PageHero } from '@/components/content/PageHero';
 import { CateringQuoteForm } from '@/components/catering/CateringQuoteForm';
 import { TrackedOrderLink } from '@/components/analytics/TrackedOrderLink';
 import { createPageMetadata } from '@/lib/seo/metadata';
+import Link from 'next/link';
 
 const cateringCategories = [
-  'Pizza packages',
-  'Pasta packages',
-  'Italian entrée packages',
-  'Chicken packages',
-  'Salads and sides',
+  'Pasta trays',
+  'Chicken and eggplant trays',
+  'Salad trays and platters',
   'Garlic rolls',
-  'Sandwich and deli platters',
-  'Desserts and beverages',
+  'Italian buffet packages',
+  'Grilled chicken packages',
+  'Sliders and deli platters',
+  'Pizza and garlic rolls combo',
 ];
 
 export const metadata = createPageMetadata({
   title: "Catering in Davie, FL | Milano's Pizzas",
   description:
-    "Request a catering quote from Milano's Pizzas in Davie for pizza, pasta, entrées, chicken, salads, sides, rolls, platters, desserts, and beverages.",
+    "Browse catering trays and packages from Milano's Pizzas in Davie, then request a quote for pizza, pasta, chicken, salads, garlic rolls, sliders, and deli platters.",
   path: '/catering',
 });
 
@@ -30,9 +31,14 @@ export default function CateringPage() {
         intro="Tell us about your gathering and the Milano's team will follow up directly about availability and final pricing."
         breadcrumbs={[{ label: 'Home', href: '/' }, { label: 'Catering', href: '/catering' }]}
         actions={
-          <a className="button button-cream button-large" href="#catering-quote">
-            Request a Catering Quote
-          </a>
+          <>
+            <a className="button button-cream button-large" href="#catering-quote">
+              Request a Catering Quote
+            </a>
+            <Link className="button button-outline-light button-large" href="/menu#menu-catering">
+              View Catering Menu
+            </Link>
+          </>
         }
       />
 
@@ -44,8 +50,8 @@ export default function CateringPage() {
               <h2>Build a spread for your gathering</h2>
             </div>
             <p>
-              These general categories are a starting point. No price, minimum notice, delivery
-              range, or availability promise is published on this page.
+              Explore our catering menu for tray sizes, package prices, serving counts and minimums.
+              Contact Milano&apos;s to confirm availability and plan your gathering.
             </p>
           </div>
           <ul className="catering-category-grid">

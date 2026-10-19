@@ -10,6 +10,8 @@ import { PageHero } from '@/components/content/PageHero';
 import { OrderCta } from '@/components/content/OrderCta';
 import { TrackedOrderLink } from '@/components/analytics/TrackedOrderLink';
 import { createPageMetadata } from '@/lib/seo/metadata';
+import Link from 'next/link';
+import { MenuCatalog, MenuPrintNote } from '@/components/menu/MenuCatalog';
 
 interface MenuCategoryPageProps {
   params: { slug: string };
@@ -44,55 +46,37 @@ export default function MenuCategoryPage({ params }: MenuCategoryPageProps) {
       <PageHero
         eyebrow="Milano's menu"
         title={page.h1}
-        intro={page.slug === 'lunch-specials'
-          ? 'Explore our lunch menu in online ordering for the latest selection and availability.'
-          : page.intro}
+        intro={page.intro}
         breadcrumbs={[
           { label: 'Home', href: '/' },
           { label: 'Menu', href: '/menu' },
           { label: page.label, href: `/menu/${page.slug}` },
         ]}
         actions={
-          <TrackedOrderLink className="button button-cream button-large" source={page.source}>
-            Order Online
-          </TrackedOrderLink>
+          <>
+            <TrackedOrderLink className="button button-cream button-large" source={page.source}>
+              Order Online
+            </TrackedOrderLink>
+            <a className="button button-outline-light button-large" href="/menus/Milanos_Takeout_Menu.pdf" download>
+              Download Menu (PDF)
+            </a>
+          </>
         }
+        compact
       />
 
-      <section className="content-section category-content">
-        <div className="site-container narrow-container">
-          <h2>{categoryItems.length > 0 ? 'From our menu' : 'Explore online ordering'}</h2>
-          <p className="large-copy">
-            {categoryItems.length > 0
-              ? 'Browse a few dishes from this category. Continue to online ordering for the latest selection and availability.'
-              : "We’re updating this section of our website. View our current menu in online ordering."}
-          </p>
-
-          {categoryItems.length > 0 && (
-            <div className="approved-item-grid">
-              {categoryItems.map((item) => (
-                <article
-                  key={item.slug}
-                  className={item.image ? 'approved-item-card' : 'approved-item-card text-only'}
-                >
-                  {item.image && (
-                    <img
-                      src={item.image.src}
-                      alt={item.image.alt}
-                      width={item.image.width}
-                      height={item.image.height}
-                      loading="lazy"
-                    />
-                  )}
-                  <div>
-                    <h3>{item.name}</h3>
-                    <p>{item.shortDescription}</p>
-                    <TrackedOrderLink source={`featured-${item.slug}`} menuItem>
-                      Order Online <span aria-hidden="true">→</span>
-                    </TrackedOrderLink>
-                  </div>
-                </article>
-              ))}
+      <section className="content-section full-menu-section">
+        <div className="site-container">
+          <Link className="text-link menu-all-link" href="/menu#menu-navigation">← All menu categories</Link>
+          {categoryItems.length > 0 ? (
+            <>
+              <MenuPrintNote />
+              <MenuCatalog items={categoryItems} categories={page.categories} />
+            </>
+          ) : (
+            <div className="category-content">
+              <h2>Explore online ordering</h2>
+              <p className="large-copy">View our current selection and availability in online ordering.</p>
             </div>
           )}
         </div>

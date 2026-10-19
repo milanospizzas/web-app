@@ -4,12 +4,12 @@ This inventory covers imagery selected for the new first-party Milano's website.
 
 | Original filename | Source page / record | Original dimensions | Intended use | Milano's ownership status | Optimized output | Descriptive alt text |
 |---|---|---:|---|---|---|---|
-| `Milanos-Pizzas-logo.png` | Current `www.milanospizzas.com` header/media library | 11,306 × 8,623 | Global header and footer | Confirmed official Milano's brand mark from the current site; retain owner rights record | `milanos-logo-{160,320}.{avif,webp}` | `Milano's Pizzas logo` |
+| `Milanos-Pizzas-Semi-Circle-Logo.png` | Owner attachment `Milanos Pizzas New Semi Circle Logo.png`, October 18, 2026 | 2,741 × 1,636, with alpha | Global header/footer and food-image plate stamp reference | Supplied and authorized directly by the owner | `milanos-semicircle-logo-{160,320}.{avif,webp}` | `Milano's Pizzas logo` |
 | `b1c1f4c9-3e3c-43ce-9e96-41daa5dd0d17-scaled.jpeg` (stored as `milanos-davie-interior.jpeg`) | Current [About page](https://www.milanospizzas.com/about-us/), homepage contact background, WordPress media ID 1887 | 2,560 × 1,920 | Homepage hero, About page, social preview | Visibly Milano's-specific and served by the current official site; formal copyright metadata is absent, so owner confirmation remains a launch check | `milanos-davie-interior-{960,1600}.{avif,webp}` and `milanos-davie-og.jpg` | `Dining room and service counter inside Milano's Pizzas in Davie` |
 
 Source integrity hashes:
 
-- `Milanos-Pizzas-logo.png`: SHA-256 `BF55D67F646824F117372836E8C95577B0654E595D88B585D946C2E7896E88A4`
+- `Milanos-Pizzas-Semi-Circle-Logo.png`: SHA-256 `38047F2AB17082248A76BDBFE13316828B813453247E48C81BFA0A901B69BD18`
 - `milanos-davie-interior.jpeg`: SHA-256 `C331A584877C7BA9C8DFB086B4416ED5C5AAF7A8757D75F249F5389E82E48C0C`
 
 ## Excluded or deferred assets
@@ -19,6 +19,18 @@ Source integrity hashes:
 | `about_img_.png` / duplicated `hero_img_6_1-2.png` | Excluded; not retained in the public build | Generic template-style pizza image, duplicated in the current media library, with no reliable item identity or conclusive ownership provenance. |
 | `newsletter-bg.jpeg` | Deferred | Current media-library food spread, but its caption, alt text, brand linkage, and rights provenance are empty. Requires owner approval before use. |
 | Review/customer/delivery-platform images | Prohibited | Third-party/customer photography is outside the approved source boundary. |
-| AI-generated dish images | Prohibited | They cannot represent actual Milano's menu items. |
+| Previous `Milanos-Pizzas-logo.png` and `milanos-logo-*` derivatives | Superseded | The owner supplied a replacement semicircle logo on October 18. The earlier source remains available as a historical asset, but active header/footer references use the new files. |
 
-No named featured dish is currently published with photography. The featured-item model filters out entries that do not have a real, approved item image.
+## Owner-authorized menu images
+
+The owner requested generated food images beginning October 17 and expanded the request to every menu item on October 18. This later authorization supersedes the earlier exclusion of generated dish images. The images are generated sequentially using the built-in image-generation tool, one image per call. PNG masters and internal provenance live in `apps/web/assets/generated/`; optimized WebP derivatives are served from `apps/web/public/images/menu/`. `menu-photo-plan.json` records every image's subject, prompt, status and actual dimensions; `apps/web/src/content/menu-images.json` maps images to menu slugs. The native master size is 1536 × 1024, not 8K.
+
+The completed inventory contains 149 unique, verified PNG/WebP pairs at native 1536 × 1024: 142 mapped images cover all 170 catalog rows, and seven supplemental customization variants have no menu-row mapping. The supplemental variants are Baked Cheese Ravioli, Baked Short Rib Ravioli, Baked Wild Mushroom Ravioli, Salad with Shrimp, Salad with Broccoli, Pasta with Broccoli, and Ricotta & Cheese Red Pizza. All manifest entries are complete. The deployed menu references all 142 mapped images, and all 149 live WebPs match their local SHA-256 hashes. The original PDF and four active logo derivatives also match their retained files.
+
+This inventory is deployed to the existing Cloudflare staging Worker, version `2eda50d5-3f78-4eed-9c6b-bda15c69fab9`. Web typecheck, lint, forced staging build, static validators and all 25 live routing smoke checks passed. The 27 HTML pages remain noindex and the sitemap remains empty. Desktop (1440 px) and mobile (390 px) visual checks confirmed the replacement header logo, uncropped food images and no horizontal overflow or visible illustration captions. This release leaves the live WordPress site, DNS and Amplify unchanged.
+
+The owner explicitly requested removal of the visible illustration captions. Images retain neutral descriptive alt text, and internal generation provenance remains documented. The images are generated representations, not evidence of an actual restaurant photoshoot.
+
+The owner confirmed tomato sauce for all three adult ravioli fillings: cheese, short rib and wild mushroom. Their image subjects use this confirmed sauce rather than an assumed preparation.
+
+Use the new semicircle logo as a subtle printed ceramic stamp fired under the glaze on the front plate rim, following perspective and lighting rather than appearing as a sticker or overlaid graphic. The complete logo must remain inside the white rim with clear white margins, without crossing the plate edge or overlapping a bowl. All pizza images use thin New York-style crust, with every topping under the cheese except pepperoni on top. The owner confirmed carrots, broccoli, zucchini, cauliflower florets and yellow squash for the Mixed Vegetables side; this replaces the earlier assumed three-vegetable mix. Keep the common white plate, 45-degree angle, dark wood background and soft lighting consistent across the series. Earlier candidates must be checked against these owner corrections before final acceptance.

@@ -29,4 +29,14 @@ The separate promotional offers printed on page 1 remain available in the PDF do
 
 ## Verification
 
-The catalog was checked against both rendered PDF pages by a second reviewer. All 170 slugs are unique; every item has a finite base price or finite labeled size prices. The AI-generated Garlic Rolls illustration is labeled as generated and depicts a half-dozen serving. Remaining items have no fabricated food photographs.
+The catalog was checked against both rendered PDF pages by a second reviewer. All 170 slugs are unique; every item has a finite base price or finite labeled size prices. The first Garlic Rolls image depicts a half-dozen serving, one of the printed portion options.
+
+## Owner-directed image series
+
+On October 18, 2026 the owner supplied `Milanos Pizzas New Semi Circle Logo.png` and requested its use on the website and plate rims, removal of the visible illustration captions, and generated images for every menu item. The exact source is retained as `apps/web/assets/source/Milanos-Pizzas-Semi-Circle-Logo.png`. Internal generated-image provenance remains in `apps/web/assets/generated/README.md`; published images use neutral descriptive alt text.
+
+The owner additionally specified a realistic ceramic printed stamp for the plate logo, completely inside the white rim with clear white margins and no bowl overlap, and thin New York-style pizza. Every pizza topping belongs under the cheese except pepperoni, which belongs on top. These are owner-provided presentation requirements, not details transcribed from the PDF. They apply across the image series and supersede conflicting earlier candidates or prompts without changing printed menu prices or ingredients.
+
+The owner also confirmed the Mixed Vegetables side's ingredients: carrots, broccoli, zucchini, cauliflower florets and yellow squash. The catalog's short description now records that confirmation, while retaining the printed $4.00 price. This owner-confirmed mix replaces the earlier representative three-vegetable assumption used for image planning.
+
+`apps/web/assets/generated/menu-photo-plan.json` tracks the expanded photography subjects, statuses and mappings to catalog rows; `apps/web/src/content/menu-images.json` lists published image references. Identical food across dinner, side, lunch or catering entries may share an image, and size choices may share a representative presentation. Generation remains in progress; the plan is not a claim that all requested images are finished. Check each delivered image against the latest logo, stamp and pizza requirements before accepting it as final.

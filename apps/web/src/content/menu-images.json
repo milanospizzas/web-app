@@ -1,0 +1,534 @@
+{
+  "garlic-rolls": {
+    "src": "/images/menu/garlic-rolls.webp",
+    "alt": "Garlic rolls on a white Milano’s Pizzas plate.",
+    "width": 1536,
+    "height": 1024,
+    "generated": true
+  },
+  "catering-rolls-tray": {
+    "src": "/images/menu/garlic-rolls.webp",
+    "alt": "Garlic rolls on a white Milano’s Pizzas plate.",
+    "width": 1536,
+    "height": 1024,
+    "generated": true
+  },
+  "bruschetta-pizza": {
+    "src": "/images/menu/bruschetta-pizza.webp",
+    "alt": "bruschetta pizza on Milano's branded white tableware",
+    "width": 1536,
+    "height": 1024,
+    "generated": true
+  },
+  "baked-cheese-balls": {
+    "src": "/images/menu/baked-cheese-balls.webp",
+    "alt": "baked cheese balls on Milano's branded white tableware",
+    "width": 1536,
+    "height": 1024,
+    "generated": true
+  },
+  "baked-meatballs-mozzarella": {
+    "src": "/images/menu/baked-meatballs-mozzarella.webp",
+    "alt": "baked meatballs mozzarella on Milano's branded white tableware",
+    "width": 1536,
+    "height": 1024,
+    "generated": true
+  },
+  "side-baked-meatballs-mozzarella": {
+    "src": "/images/menu/baked-meatballs-mozzarella.webp",
+    "alt": "baked meatballs mozzarella on Milano's branded white tableware",
+    "width": 1536,
+    "height": 1024,
+    "generated": true
+  },
+  "baked-sausage-links-mozzarella": {
+    "src": "/images/menu/baked-sausage-links-mozzarella.webp",
+    "alt": "baked sausage links mozzarella on Milano's branded white tableware",
+    "width": 1536,
+    "height": 1024,
+    "generated": true
+  },
+  "side-baked-sausage-mozzarella": {
+    "src": "/images/menu/baked-sausage-links-mozzarella.webp",
+    "alt": "baked sausage links mozzarella on Milano's branded white tableware",
+    "width": 1536,
+    "height": 1024,
+    "generated": true
+  },
+  "mussels-marinara-appetizer": {
+    "src": "/images/menu/mussels-marinara-appetizer.webp",
+    "alt": "mussels marinara appetizer on Milano's branded white tableware",
+    "width": 1536,
+    "height": 1024,
+    "generated": true
+  },
+  "meatball-parm-sliders": {
+    "src": "/images/menu/meatball-parm-sliders.webp",
+    "alt": "meatball parm sliders on Milano's branded white tableware",
+    "width": 1536,
+    "height": 1024,
+    "generated": true
+  },
+  "catering-meatball-parm-sliders": {
+    "src": "/images/menu/meatball-parm-sliders.webp",
+    "alt": "meatball parm sliders on Milano's branded white tableware",
+    "width": 1536,
+    "height": 1024,
+    "generated": true
+  },
+  "chicken-parm-sliders": {
+    "src": "/images/menu/chicken-parm-sliders.webp",
+    "alt": "chicken parm sliders on Milano's branded white tableware",
+    "width": 1536,
+    "height": 1024,
+    "generated": true
+  },
+  "catering-chicken-parm-sliders": {
+    "src": "/images/menu/chicken-parm-sliders.webp",
+    "alt": "chicken parm sliders on Milano's branded white tableware",
+    "width": 1536,
+    "height": 1024,
+    "generated": true
+  },
+  "sloppy-sausage-parm-sliders": {
+    "src": "/images/menu/sloppy-sausage-parm-sliders.webp",
+    "alt": "sloppy sausage parm sliders on Milano's branded white tableware",
+    "width": 1536,
+    "height": 1024,
+    "generated": true
+  },
+  "catering-sloppy-sausage-sliders": {
+    "src": "/images/menu/sloppy-sausage-parm-sliders.webp",
+    "alt": "sloppy sausage parm sliders on Milano's branded white tableware",
+    "width": 1536,
+    "height": 1024,
+    "generated": true
+  },
+  "pasta-fagioli": {
+    "src": "/images/menu/pasta-fagioli.webp",
+    "alt": "pasta fagioli on Milano's branded white tableware",
+    "width": 1536,
+    "height": 1024,
+    "generated": true
+  },
+  "minestrone": {
+    "src": "/images/menu/minestrone.webp",
+    "alt": "minestrone on Milano's branded white tableware",
+    "width": 1536,
+    "height": 1024,
+    "generated": true
+  },
+  "antipasto-salad": {
+    "src": "/images/menu/antipasto-salad.webp",
+    "alt": "antipasto salad on Milano's branded white tableware",
+    "width": 1536,
+    "height": 1024,
+    "generated": true
+  },
+  "catering-antipasto-platter": {
+    "src": "/images/menu/antipasto-salad.webp",
+    "alt": "antipasto salad on Milano's branded white tableware",
+    "width": 1536,
+    "height": 1024,
+    "generated": true
+  },
+  "house-salad": {
+    "src": "/images/menu/house-salad.webp",
+    "alt": "house salad on Milano's branded white tableware",
+    "width": 1536,
+    "height": 1024,
+    "generated": true
+  },
+  "catering-garden-salad": {
+    "src": "/images/menu/house-salad.webp",
+    "alt": "house salad on Milano's branded white tableware",
+    "width": 1536,
+    "height": 1024,
+    "generated": true
+  },
+  "caesar-salad": {
+    "src": "/images/menu/caesar-salad.webp",
+    "alt": "caesar salad on Milano's branded white tableware",
+    "width": 1536,
+    "height": 1024,
+    "generated": true
+  },
+  "catering-caesar-salad": {
+    "src": "/images/menu/caesar-salad.webp",
+    "alt": "caesar salad on Milano's branded white tableware",
+    "width": 1536,
+    "height": 1024,
+    "generated": true
+  },
+  "milanos-salad": {
+    "src": "/images/menu/milanos-salad.webp",
+    "alt": "milanos salad on Milano's branded white tableware",
+    "width": 1536,
+    "height": 1024,
+    "generated": true
+  },
+  "catering-milanos-salad": {
+    "src": "/images/menu/milanos-salad.webp",
+    "alt": "milanos salad on Milano's branded white tableware",
+    "width": 1536,
+    "height": 1024,
+    "generated": true
+  },
+  "gorgonzola-salad": {
+    "src": "/images/menu/gorgonzola-salad.webp",
+    "alt": "gorgonzola salad on Milano's branded white tableware",
+    "width": 1536,
+    "height": 1024,
+    "generated": true
+  },
+  "lunch-gorgonzola-salad": {
+    "src": "/images/menu/gorgonzola-salad.webp",
+    "alt": "gorgonzola salad on Milano's branded white tableware",
+    "width": 1536,
+    "height": 1024,
+    "generated": true
+  },
+  "catering-gorgonzola-salad": {
+    "src": "/images/menu/gorgonzola-salad.webp",
+    "alt": "gorgonzola salad on Milano's branded white tableware",
+    "width": 1536,
+    "height": 1024,
+    "generated": true
+  },
+  "burrata-cheese-salad": {
+    "src": "/images/menu/burrata-cheese-salad.webp",
+    "alt": "burrata cheese salad on Milano's branded white tableware",
+    "width": 1536,
+    "height": 1024,
+    "generated": true
+  },
+  "lunch-burrata-cheese-salad": {
+    "src": "/images/menu/burrata-cheese-salad.webp",
+    "alt": "burrata cheese salad on Milano's branded white tableware",
+    "width": 1536,
+    "height": 1024,
+    "generated": true
+  },
+  "fresh-mozzarella-tomato-salad": {
+    "src": "/images/menu/fresh-mozzarella-tomato-salad.webp",
+    "alt": "fresh mozzarella tomato salad on Milano's branded white tableware",
+    "width": 1536,
+    "height": 1024,
+    "generated": true
+  },
+  "spaghetti-tomato-sauce": {
+    "src": "/images/menu/spaghetti-tomato-sauce.webp",
+    "alt": "spaghetti tomato sauce on Milano's branded white tableware",
+    "width": 1536,
+    "height": 1024,
+    "generated": true
+  },
+  "lunch-pasta-any-sauce": {
+    "src": "/images/menu/spaghetti-tomato-sauce.webp",
+    "alt": "spaghetti tomato sauce on Milano's branded white tableware",
+    "width": 1536,
+    "height": 1024,
+    "generated": true
+  },
+  "penne-tomato-sauce": {
+    "src": "/images/menu/penne-tomato-sauce.webp",
+    "alt": "penne tomato sauce on Milano's branded white tableware",
+    "width": 1536,
+    "height": 1024,
+    "generated": true
+  },
+  "bowties-tomato-sauce": {
+    "src": "/images/menu/bowties-tomato-sauce.webp",
+    "alt": "bowties tomato sauce on Milano's branded white tableware",
+    "width": 1536,
+    "height": 1024,
+    "generated": true
+  },
+  "fettuccini-tomato-sauce": {
+    "src": "/images/menu/fettuccini-tomato-sauce.webp",
+    "alt": "fettuccini tomato sauce on Milano's branded white tableware",
+    "width": 1536,
+    "height": 1024,
+    "generated": true
+  },
+  "marinara-pasta": {
+    "src": "/images/menu/marinara-pasta.webp",
+    "alt": "marinara pasta on Milano's branded white tableware",
+    "width": 1536,
+    "height": 1024,
+    "generated": true
+  },
+  "meat-sauce-pasta": {
+    "src": "/images/menu/meat-sauce-pasta.webp",
+    "alt": "meat sauce pasta on Milano's branded white tableware",
+    "width": 1536,
+    "height": 1024,
+    "generated": true
+  },
+  "mushroom-marinara-pasta": {
+    "src": "/images/menu/mushroom-marinara-pasta.webp",
+    "alt": "mushroom marinara pasta on Milano's branded white tableware",
+    "width": 1536,
+    "height": 1024,
+    "generated": true
+  },
+  "meatballs-sausage-pasta": {
+    "src": "/images/menu/meatballs-sausage-pasta.webp",
+    "alt": "meatballs sausage pasta on Milano's branded white tableware",
+    "width": 1536,
+    "height": 1024,
+    "generated": true
+  },
+  "pink-sauce-pasta": {
+    "src": "/images/menu/pink-sauce-pasta.webp",
+    "alt": "pink sauce pasta on Milano's branded white tableware",
+    "width": 1536,
+    "height": 1024,
+    "generated": true
+  },
+  "catering-penne-pink-sauce": {
+    "src": "/images/menu/pink-sauce-pasta.webp",
+    "alt": "pink sauce pasta on Milano's branded white tableware",
+    "width": 1536,
+    "height": 1024,
+    "generated": true
+  },
+  "alfredo-pasta": {
+    "src": "/images/menu/alfredo-pasta.webp",
+    "alt": "alfredo pasta on Milano's branded white tableware",
+    "width": 1536,
+    "height": 1024,
+    "generated": true
+  },
+  "pesto-pasta": {
+    "src": "/images/menu/pesto-pasta.webp",
+    "alt": "pesto pasta on Milano's branded white tableware",
+    "width": 1536,
+    "height": 1024,
+    "generated": true
+  },
+  "pink-sauce-bacon-pasta": {
+    "src": "/images/menu/pink-sauce-bacon-pasta.webp",
+    "alt": "pink sauce bacon pasta on Milano's branded white tableware",
+    "width": 1536,
+    "height": 1024,
+    "generated": true
+  },
+  "alfredo-bacon-pasta": {
+    "src": "/images/menu/alfredo-bacon-pasta.webp",
+    "alt": "alfredo bacon pasta on Milano's branded white tableware",
+    "width": 1536,
+    "height": 1024,
+    "generated": true
+  },
+  "white-clam-sauce-pasta": {
+    "src": "/images/menu/white-clam-sauce-pasta.webp",
+    "alt": "white clam sauce pasta on Milano's branded white tableware",
+    "width": 1536,
+    "height": 1024,
+    "generated": true
+  },
+  "red-clam-sauce-pasta": {
+    "src": "/images/menu/red-clam-sauce-pasta.webp",
+    "alt": "red clam sauce pasta on Milano's branded white tableware",
+    "width": 1536,
+    "height": 1024,
+    "generated": true
+  },
+  "shrimp-clams-arrabbiata": {
+    "src": "/images/menu/shrimp-clams-arrabbiata.webp",
+    "alt": "shrimp clams arrabbiata on Milano's branded white tableware",
+    "width": 1536,
+    "height": 1024,
+    "generated": true
+  },
+  "shrimp-marinara-pasta": {
+    "src": "/images/menu/shrimp-marinara-pasta.webp",
+    "alt": "shrimp marinara pasta on Milano's branded white tableware",
+    "width": 1536,
+    "height": 1024,
+    "generated": true
+  },
+  "mussels-marinara-pasta": {
+    "src": "/images/menu/mussels-marinara-pasta.webp",
+    "alt": "mussels marinara pasta on Milano's branded white tableware",
+    "width": 1536,
+    "height": 1024,
+    "generated": true
+  },
+  "chicken-parmigiana": {
+    "src": "/images/menu/chicken-parmigiana.webp",
+    "alt": "chicken parmigiana on Milano's branded white tableware",
+    "width": 1536,
+    "height": 1024,
+    "generated": true
+  },
+  "lunch-chicken-parmigiana": {
+    "src": "/images/menu/chicken-parmigiana.webp",
+    "alt": "chicken parmigiana on Milano's branded white tableware",
+    "width": 1536,
+    "height": 1024,
+    "generated": true
+  },
+  "catering-chicken-parmigiana": {
+    "src": "/images/menu/chicken-parmigiana.webp",
+    "alt": "chicken parmigiana on Milano's branded white tableware",
+    "width": 1536,
+    "height": 1024,
+    "generated": true
+  },
+  "chicken-cutlet-dinner": {
+    "src": "/images/menu/chicken-cutlet-dinner.webp",
+    "alt": "chicken cutlet dinner on Milano's branded white tableware",
+    "width": 1536,
+    "height": 1024,
+    "generated": true
+  },
+  "chicken-marsala": {
+    "src": "/images/menu/chicken-marsala.webp",
+    "alt": "chicken marsala on Milano's branded white tableware",
+    "width": 1536,
+    "height": 1024,
+    "generated": true
+  },
+  "catering-chicken-marsala": {
+    "src": "/images/menu/chicken-marsala.webp",
+    "alt": "chicken marsala on Milano's branded white tableware",
+    "width": 1536,
+    "height": 1024,
+    "generated": true
+  },
+  "chicken-francaise": {
+    "src": "/images/menu/chicken-francaise.webp",
+    "alt": "chicken francaise on Milano's branded white tableware",
+    "width": 1536,
+    "height": 1024,
+    "generated": true
+  },
+  "catering-chicken-francaise": {
+    "src": "/images/menu/chicken-francaise.webp",
+    "alt": "chicken francaise on Milano's branded white tableware",
+    "width": 1536,
+    "height": 1024,
+    "generated": true
+  },
+  "grilled-chicken-broccoli": {
+    "src": "/images/menu/grilled-chicken-broccoli.webp",
+    "alt": "grilled chicken broccoli on Milano's branded white tableware",
+    "width": 1536,
+    "height": 1024,
+    "generated": true
+  },
+  "sausage-peppers": {
+    "src": "/images/menu/sausage-peppers.webp",
+    "alt": "sausage peppers on Milano's branded white tableware",
+    "width": 1536,
+    "height": 1024,
+    "generated": true
+  },
+  "catering-sausage-peppers": {
+    "src": "/images/menu/sausage-peppers.webp",
+    "alt": "sausage peppers on Milano's branded white tableware",
+    "width": 1536,
+    "height": 1024,
+    "generated": true
+  },
+  "beef-brisket-mushroom-risotto": {
+    "src": "/images/menu/beef-brisket-mushroom-risotto.webp",
+    "alt": "beef brisket mushroom risotto on Milano's branded white tableware",
+    "width": 1536,
+    "height": 1024,
+    "generated": true
+  },
+  "lasagna": {
+    "src": "/images/menu/lasagna.webp",
+    "alt": "lasagna on Milano's branded white tableware",
+    "width": 1536,
+    "height": 1024,
+    "generated": true
+  },
+  "lunch-lasagna": {
+    "src": "/images/menu/lasagna.webp",
+    "alt": "lasagna on Milano's branded white tableware",
+    "width": 1536,
+    "height": 1024,
+    "generated": true
+  },
+  "catering-lasagna": {
+    "src": "/images/menu/lasagna.webp",
+    "alt": "lasagna on Milano's branded white tableware",
+    "width": 1536,
+    "height": 1024,
+    "generated": true
+  },
+  "baked-ziti": {
+    "src": "/images/menu/baked-ziti.webp",
+    "alt": "baked ziti on Milano's branded white tableware",
+    "width": 1536,
+    "height": 1024,
+    "generated": true
+  },
+  "lunch-baked-ziti": {
+    "src": "/images/menu/baked-ziti.webp",
+    "alt": "baked ziti on Milano's branded white tableware",
+    "width": 1536,
+    "height": 1024,
+    "generated": true
+  },
+  "catering-baked-ziti": {
+    "src": "/images/menu/baked-ziti.webp",
+    "alt": "baked ziti on Milano's branded white tableware",
+    "width": 1536,
+    "height": 1024,
+    "generated": true
+  },
+  "baked-ziti-meatballs": {
+    "src": "/images/menu/baked-ziti-meatballs.webp",
+    "alt": "baked ziti meatballs on Milano's branded white tableware",
+    "width": 1536,
+    "height": 1024,
+    "generated": true
+  },
+  "baked-ziti-sausage": {
+    "src": "/images/menu/baked-ziti-sausage.webp",
+    "alt": "baked ziti sausage on Milano's branded white tableware",
+    "width": 1536,
+    "height": 1024,
+    "generated": true
+  },
+  "baked-ziti-ricotta": {
+    "src": "/images/menu/baked-ziti-ricotta.webp",
+    "alt": "baked ziti ricotta on Milano's branded white tableware",
+    "width": 1536,
+    "height": 1024,
+    "generated": true
+  },
+  "catering-baked-ziti-ricotta": {
+    "src": "/images/menu/baked-ziti-ricotta.webp",
+    "alt": "baked ziti ricotta on Milano's branded white tableware",
+    "width": 1536,
+    "height": 1024,
+    "generated": true
+  },
+  "baked-ziti-pink-sauce": {
+    "src": "/images/menu/baked-ziti-pink-sauce.webp",
+    "alt": "baked ziti pink sauce on Milano's branded white tableware",
+    "width": 1536,
+    "height": 1024,
+    "generated": true
+  },
+  "eggplant-parmigiana-pasta": {
+    "src": "/images/menu/eggplant-parmigiana-pasta.webp",
+    "alt": "eggplant parmigiana pasta on Milano's branded white tableware",
+    "width": 1536,
+    "height": 1024,
+    "generated": true
+  },
+  "eggplant-rollatini-pasta": {
+    "src": "/images/menu/eggplant-rollatini-pasta.webp",
+    "alt": "eggplant rollatini pasta on Milano's branded white tableware",
+    "width": 1536,
+    "height": 1024,
+    "generated": true
+  }
+}

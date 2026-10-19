@@ -83,7 +83,7 @@ button, input, textarea, select { font: inherit; }
 
 .nav-shell { min-height: 76px; display: flex; align-items: center; justify-content: space-between; gap: 2rem; }
 .brand-link { display: flex; align-items: center; gap: .65rem; min-width: max-content; }
-.brand-logo { width: 58px; height: 48px; object-fit: contain; }
+.brand-logo { width: 80px; height: auto; aspect-ratio: 2741 / 1636; object-fit: contain; }
 .brand-name { font-family: Georgia, serif; font-size: 1.15rem; font-weight: 700; }
 .desktop-nav { display: none; align-items: center; gap: 1.65rem; }
 .nav-link { position: relative; font-size: .9rem; font-weight: 700; }
@@ -217,7 +217,6 @@ button, input, textarea, select { font: inherit; }
 .menu-item-notes li + li { margin-top: .25rem; }
 .menu-item-photo { margin: 0; }
 .menu-item-photo img { display: block; width: 100%; height: auto; }
-.menu-item-photo figcaption { padding: .5rem 1.3rem 0; color: var(--muted); font-size: .73rem; }
 .menu-back-link { display: inline-flex; align-items: center; min-height: 44px; margin-top: .65rem; color: var(--tomato); font-size: .83rem; font-weight: 800; text-decoration: underline; text-underline-offset: 3px; }
 .menu-all-link { display: inline-block; margin-bottom: .25rem; }
 .menu-help-links { margin-top: 3rem; padding-top: 1.5rem; border-top: 1px solid rgba(32,27,23,.18); font-size: .95rem; }
@@ -286,7 +285,6 @@ button, input, textarea, select { font: inherit; }
 .featured-favorite-card > img { width: 100%; aspect-ratio: 4 / 3; object-fit: cover; }
 .featured-favorite-card figure { margin: 0; }
 .featured-favorite-card figure img { display: block; width: 100%; height: auto; }
-.featured-favorite-card figcaption { padding: .45rem 1.3rem 0; color: var(--muted); font-size: .73rem; }
 .featured-favorite-card > div:last-child { padding: 1.3rem; }
 .featured-favorite-card h3 { margin: 0; font-family: Georgia, serif; font-size: 1.55rem; }
 .featured-favorite-card p { color: var(--muted); font-size: .9rem; }
@@ -392,6 +390,8 @@ button, input, textarea, select { font: inherit; }
 
 @media (max-width: 759px) {
   html { scroll-padding-bottom: 90px; }
+  .nav-shell { gap: .75rem; }
+  .brand-name { font-size: clamp(1rem, 4.5vw, 1.15rem); }
   body:has(main :focus-visible) .mobile-sticky-order-nav { display: none; }
   .hero-grid { padding-block: 3rem; gap: 2.5rem; }
   .home-category-card { min-height: 88px; }
@@ -408,7 +408,6 @@ button, input, textarea, select { font: inherit; }
   .menu-directory-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .approved-item-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .menu-item-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .menu-item-with-image { grid-column: 1 / -1; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: center; }
   .order-cta-inner { grid-template-columns: 1fr auto; }
   .order-cta .button { justify-self: end; }
   .story-grid { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }

@@ -317,9 +317,6 @@ if (!garlicImage || !existsSync(join(outputDirectory, 'images/menu/garlic-rolls.
 ) {
   errors.push('menu.html: the Garlic Rolls image needs dimensions and lazy loading');
 }
-if (!/AI-generated illustration\. Presentation may vary\./.test(visibleText(garlicRolls))) {
-  errors.push('menu.html: the generated food image needs a visible illustration disclosure');
-}
 
 if (errors.length) {
   console.error(errors.join('\n'));

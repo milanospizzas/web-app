@@ -28,7 +28,6 @@ function MenuItemCard({ item }: { item: MenuItem }) {
             height={item.image.height}
             sizes="(min-width: 760px) 560px, calc(100vw - 2rem)"
           />
-          {item.image.generated && <figcaption>AI-generated illustration. Presentation may vary.</figcaption>}
         </figure>
       )}
       <div className="menu-item-copy">

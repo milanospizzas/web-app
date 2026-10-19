@@ -478,7 +478,13 @@ export const menuCatalog: CatalogItem[] = [
   item('Side Orders', 'side-ricotta', 'Side Ricotta', 4),
   item('Side Orders', 'side-pasta', 'Side of Pasta with Sauce', 4),
   item('Side Orders', 'side-broccoli', 'Broccoli', 4),
-  item('Side Orders', 'side-mixed-vegetables', 'Mixed Vegetables', 4),
+  item(
+    'Side Orders',
+    'side-mixed-vegetables',
+    'Mixed Vegetables',
+    4,
+    'Carrots, broccoli, zucchini, cauliflower florets and yellow squash.'
+  ),
   item('Side Orders', 'side-peas', 'Peas', 2),
   item('Side Orders', 'burrata-ball', 'Burrata Ball', 6),
   item('Side Orders', 'fries', 'Fries', 3),

@@ -28,7 +28,6 @@ export function FeaturedFavorites() {
                     height={item.image.height}
                     sizes="(min-width: 980px) 280px, (min-width: 760px) 560px, calc(100vw - 2rem)"
                   />
-                  {item.image.generated && <figcaption>AI-generated illustration.</figcaption>}
                 </figure>
               )}
               <div>

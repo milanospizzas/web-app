@@ -1,4 +1,5 @@
 import { menuCatalog } from './menu-catalog';
+import menuImageData from './menu-images.json';
 export { menuCategoryNotes } from './menu-catalog';
 
 export type MenuCategory =
@@ -29,6 +30,8 @@ export interface MenuItemImage {
   height: number;
   generated?: boolean;
 }
+
+const menuImages: Record<string, MenuItemImage> = menuImageData;
 
 export interface MenuPriceOption {
   label: string;
@@ -270,16 +273,7 @@ const featuredSlugs = new Set([
 export const menuItems: MenuItem[] = menuCatalog.map((item) => ({
   ...item,
   fullDescription: item.shortDescription || item.name,
-  image:
-    item.slug === 'garlic-rolls'
-      ? {
-          src: '/images/menu/garlic-rolls.webp',
-          alt: 'AI-generated illustration of six golden garlic rolls on a white Milano’s Pizzas plate',
-          width: 1536,
-          height: 1024,
-          generated: true,
-        }
-      : null,
+  image: menuImages[item.slug] ?? null,
   dietaryIndicators: [],
   featured: featuredSlugs.has(item.slug),
   available: true,
